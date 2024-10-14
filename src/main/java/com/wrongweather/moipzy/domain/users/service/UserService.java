@@ -4,7 +4,6 @@ import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
-import com.wrongweather.moipzy.domain.users.dto.UserLoginResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
 import com.wrongweather.moipzy.global.exception.LoginFailedException;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,7 @@ public class UserService {
                 .build();
     }
 
-    public UserLoginResponseDto login(UserLoginRequestDto userLoginRequestDto) {
+    public User login(UserLoginRequestDto userLoginRequestDto) {
         String requestEmail = userLoginRequestDto.getEmail();
         String requestPassword = userLoginRequestDto.getPassword();
 
@@ -36,7 +35,7 @@ public class UserService {
         if(!encoder.matches(requestPassword, foundUser.getPassword())) {
             throw new LoginFailedException();
         }
-        return new UserLoginResponseDto();
+        return foundUser;
     }
 
     public Optional<User> userValid(String email) {
