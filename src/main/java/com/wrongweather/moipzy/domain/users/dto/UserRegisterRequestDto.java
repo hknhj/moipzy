@@ -17,7 +17,7 @@ public class UserRegisterRequestDto {
         this.username = username;
     }
 
-    public User toEntity() {
+    public User toEntity(String password) {
         return User.builder()
                 .email(email)
                 .password(password)

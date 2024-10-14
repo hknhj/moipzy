@@ -23,7 +23,7 @@ public class UserService {
         String encodedPassword = encoder.encode(userRegisterRequestDto.getPassword());
 
         return UserIdResponseDto.builder()
-                .userId(userRepository.save(userRegisterRequestDto.toEntity()).getUserId())
+                .userId(userRepository.save(userRegisterRequestDto.toEntity(encodedPassword)).getUserId())
                 .build();
     }
 
