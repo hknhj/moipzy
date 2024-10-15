@@ -4,11 +4,11 @@ import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothIdResponseDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
+import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 @RequiredArgsConstructor
@@ -23,4 +23,14 @@ public class ClothService {
                 .clothId(clothRepository.save(clothRegisterRequestDto.toEntity(user)).getClothId())
                 .build();
     }
+
+    public ClothResponseDto getCloth(int clothId) {
+        System.out.println(clothId);
+        Cloth cloth = clothRepository.findByClothId(clothId).orElseThrow(() -> new RuntimeException());
+        return ClothResponseDto.builder()
+                .user(cloth.getUser())
+                .cloth(cloth)
+                .build();
+    }
+
 }

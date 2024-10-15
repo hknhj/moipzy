@@ -41,6 +41,7 @@ public class Cloth {
     private Color color;
 
     @Column(nullable = false, length = 30)
+    @Enumerated(value = EnumType.STRING) //@Enumerated 작성안하면 indexOutOfRange 오류 발생
     private Degree degree;
 
     @Builder
