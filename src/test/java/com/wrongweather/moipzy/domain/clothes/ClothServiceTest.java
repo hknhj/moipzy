@@ -11,7 +11,6 @@ import com.wrongweather.moipzy.domain.clothes.service.ClothService;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.service.UserService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
