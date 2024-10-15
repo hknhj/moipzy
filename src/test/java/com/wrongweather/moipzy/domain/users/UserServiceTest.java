@@ -128,7 +128,7 @@ public class UserServiceTest {
         User loginedUser = userService.login(userLoginRequestDto);
 
         //when
-        MvcResult result = mockMvc.perform(post("/moipzy/auth/login")
+        MvcResult result = mockMvc.perform(post("/moipzy/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userLoginRequestDto)))
                 .andExpect(status().isOk())
