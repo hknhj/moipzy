@@ -72,7 +72,7 @@ public class UserServiceTest {
         UserIdResponseDto register = userService.register(userRegisterRequestDto);
 
         //then
-        User user = userRepository.findByUserId(register.getUserId());
+        User user = userRepository.findByUserId(register.getUserId()).orElseThrow(() -> new RuntimeException());
         assertEquals(user.getEmail(), userRegisterRequestDto.getEmail());
         Assertions.assertTrue(passwordEncoder.matches(userRegisterRequestDto.getPassword(), user.getPassword()));
         assertEquals(user.getUsername(), userRegisterRequestDto.getUsername());
@@ -90,7 +90,7 @@ public class UserServiceTest {
                 .username("testname")
                 .build();
 
-        User user = userRepository.findByUserId(userService.register(userRegisterRequestDto).getUserId());
+        User user = userRepository.findByUserId(userService.register(userRegisterRequestDto).getUserId()).orElseThrow(() -> new RuntimeException());
 
         UserLoginRequestDto userLoginRequestDto = UserLoginRequestDto.builder()
                 .email(user.getEmail())
@@ -118,7 +118,7 @@ public class UserServiceTest {
                 .username("testname")
                 .build();
 
-        User user = userRepository.findByUserId(userService.register(userRegisterRequestDto).getUserId());
+        User user = userRepository.findByUserId(userService.register(userRegisterRequestDto).getUserId()).orElseThrow(() -> new RuntimeException());
 
         UserLoginRequestDto userLoginRequestDto = UserLoginRequestDto.builder()
                 .email(user.getEmail())

@@ -1,5 +1,5 @@
 package com.wrongweather.moipzy.domain.clothes.category;
 
-public enum SmallCategory {
-    TShirt, DShirt
+public enum Color {
+    BLUE
 }
