@@ -1,6 +1,7 @@
 package com.wrongweather.moipzy.domain.clothes;
 
 import com.wrongweather.moipzy.domain.BaseTimeEntity;
+import com.wrongweather.moipzy.domain.clothImg.ClothImage;
 import com.wrongweather.moipzy.domain.clothes.category.Color;
 import com.wrongweather.moipzy.domain.clothes.category.Degree;
 import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
@@ -12,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Entity(name="cloth")
 @Getter
 @Setter
 @NoArgsConstructor
