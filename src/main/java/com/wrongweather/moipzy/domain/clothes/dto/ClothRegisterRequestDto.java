@@ -1,5 +1,6 @@
 package com.wrongweather.moipzy.domain.clothes.dto;
 
+import com.wrongweather.moipzy.domain.clothImg.ClothImage;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.category.Color;
 import com.wrongweather.moipzy.domain.clothes.category.Degree;
@@ -14,26 +15,24 @@ public class ClothRegisterRequestDto {
     private int userId;
     private LargeCategory largeCategory;
     private SmallCategory smallCategory;
-    private float cloValue;
     private Color color;
     private Degree degree;
 
     @Builder
-    public ClothRegisterRequestDto(int userId, LargeCategory largeCategory, SmallCategory smallCategory, float cloValue, Color color, Degree degree) {
+    public ClothRegisterRequestDto(int userId, LargeCategory largeCategory, SmallCategory smallCategory, Color color, Degree degree) {
         this.userId = userId;
         this.largeCategory = largeCategory;
         this.smallCategory = smallCategory;
-        this.cloValue = cloValue;
         this.color = color;
         this.degree = degree;
     }
 
-    public Cloth toEntity(User user) {
+    public Cloth toEntity(User user, ClothImage clothImage) {
         return Cloth.builder()
                 .user(user)
+                .clothImage(clothImage)
                 .largeCategory(largeCategory)
                 .smallCategory(smallCategory)
-                .cloValue(cloValue)
                 .color(color)
                 .degree(degree)
                 .build();

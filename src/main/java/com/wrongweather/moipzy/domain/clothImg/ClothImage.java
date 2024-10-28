@@ -21,13 +21,9 @@ public class ClothImage {
     @Column(name = "img_url", nullable = false)
     private String imgUrl;
 
-    @OneToOne
-    @JoinColumn(name="cloth_id", nullable = false)
-    private Cloth cloth;
 
     @Builder
     public ClothImage(String imgUrl, Cloth cloth) {
         this.imgUrl = imgUrl;
-        this.cloth = cloth;
     }
 }

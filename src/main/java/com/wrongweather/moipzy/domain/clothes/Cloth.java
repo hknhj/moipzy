@@ -1,6 +1,5 @@
 package com.wrongweather.moipzy.domain.clothes;
 
-import com.wrongweather.moipzy.domain.BaseTimeEntity;
 import com.wrongweather.moipzy.domain.clothImg.ClothImage;
 import com.wrongweather.moipzy.domain.clothes.category.Color;
 import com.wrongweather.moipzy.domain.clothes.category.Degree;
@@ -12,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity(name="cloth")
 @Getter
@@ -26,6 +27,10 @@ public class Cloth {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cloth_img_id")
+    private ClothImage clothImg;
+
     @Column(nullable = false, length = 50)
     @Enumerated(value = EnumType.STRING)
     private LargeCategory largeCategory;
@@ -33,9 +38,6 @@ public class Cloth {
     @Column(nullable = false, length = 50)
     @Enumerated(value = EnumType.STRING)
     private SmallCategory smallCategory;
-
-    @Column(nullable = false)
-    private float cloValue;
 
     @Column(nullable = false, length = 30)
     @Enumerated(value = EnumType.STRING)
@@ -45,12 +47,15 @@ public class Cloth {
     @Enumerated(value = EnumType.STRING) //@Enumerated 작성안하면 indexOutOfRange 오류 발생
     private Degree degree;
 
+    @Column(name="wear_at", columnDefinition = "TIMESTAMP")
+    private LocalDateTime wearAt;
+
     @Builder
-    public Cloth(User user, float cloValue, LargeCategory largeCategory, SmallCategory smallCategory, Degree degree, Color color) {
+    public Cloth(User user, ClothImage clothImage, LargeCategory largeCategory, SmallCategory smallCategory, Degree degree, Color color) {
         this.user = user;
+        this.clothImg = clothImage;
         this.largeCategory = largeCategory;
         this.smallCategory = smallCategory;
-        this.cloValue = cloValue;
         this.degree = degree;
         this.color = color;
     }

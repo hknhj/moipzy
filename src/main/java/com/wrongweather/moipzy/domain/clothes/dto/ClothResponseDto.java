@@ -9,14 +9,11 @@ import com.wrongweather.moipzy.domain.users.User;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.Collection;
-
 @Getter
 public class ClothResponseDto {
     private int userId;
     private LargeCategory largeCategory;
     private SmallCategory smallCategory;
-    private float cloValue;
     private Color color;
     private Degree degree;
 
@@ -25,7 +22,6 @@ public class ClothResponseDto {
         this.userId = user.getUserId();
         this.largeCategory = cloth.getLargeCategory();
         this.smallCategory = cloth.getSmallCategory();
-        this.cloValue = cloth.getCloValue();
         this.color = cloth.getColor();
         this.degree = cloth.getDegree();
     }

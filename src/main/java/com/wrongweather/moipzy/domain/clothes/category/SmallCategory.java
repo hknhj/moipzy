@@ -1,5 +1,8 @@
 package com.wrongweather.moipzy.domain.clothes.category;
 
 public enum SmallCategory {
-    TShirt, DShirt
+    CARDIGAN, DENIM_JACKET, BLOUSON, BLAZER, LEATHER_JACKET,
+    HOODED, MA1, STADIUM_JACKET, COAT, PADDING,    //아우터 종류
+    T_SHIRT, POLO_SHIRT, D_SHIRT, HOODIE, SWEAT_SHIRT, KNIT, LONG_SLEEVE, //상의 종류
+    JEANS, SWEAT_PANTS, COTTON_PANTS, SLACKS, LINEN_PANTS, SHORTS
 }

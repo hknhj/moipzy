@@ -23,7 +23,7 @@ public class ClothImgService {
 
     private final ClothImageRepository clothImageRepository;
 
-    public void uploadImage(MultipartFile image, Cloth cloth) {
+    public ClothImage uploadImage(MultipartFile image) {
         try {
             // 이미지 파일 저장을 위한 경로 설정
             String uploadsDir = "src/main/resources/static/uploads/clothes/";
@@ -34,14 +34,15 @@ public class ClothImgService {
             // ProductThumbnail 엔티티 생성 및 저장
             ClothImage clothImage = ClothImage.builder()
                     .imgUrl(dbFilePath)
-                    .cloth(cloth)
                     .build();
-            clothImageRepository.save(clothImage);
+
+            return clothImageRepository.save(clothImage);
 
         } catch (IOException e) {
             // 파일 저장 중 오류가 발생한 경우 처리
             e.printStackTrace();
         }
+        return null;
     }
 
     private String saveImage(MultipartFile image, String uploadDir) throws IOException {

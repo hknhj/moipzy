@@ -1,5 +1,7 @@
 package com.wrongweather.moipzy.domain.clothes.service;
 
+import com.wrongweather.moipzy.domain.clothImg.ClothImage;
+import com.wrongweather.moipzy.domain.clothImg.ClothImageRepository;
 import com.wrongweather.moipzy.domain.clothImg.service.ClothImgService;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
@@ -22,12 +24,14 @@ public class ClothService {
 
     @Transactional
     public ClothIdResponseDto registerCloth(MultipartFile clothImg, ClothRegisterRequestDto clothRegisterRequestDto) {
+        //유저 정보를 먼저 불러오기
         User user = userRepository.findByUserId(clothRegisterRequestDto.getUserId()).orElseThrow(() -> new RuntimeException());
 
-        Cloth cloth = clothRepository.save(clothRegisterRequestDto.toEntity(user));
-        clothImgService.uploadImage(clothImg, cloth);
+        //사진을 저장하기
+        ClothImage clothImage = clothImgService.uploadImage(clothImg);
 
-        System.out.println(clothRegisterRequestDto.toString());
+        //옷을 저장하기
+        Cloth cloth = clothRepository.save(clothRegisterRequestDto.toEntity(user, clothImage));
 
         return ClothIdResponseDto.builder()
                 .clothId(cloth.getClothId())
