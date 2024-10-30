@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ClothService {
@@ -38,9 +40,17 @@ public class ClothService {
                 .build();
     }
 
-    public ClothResponseDto getCloth(int clothId) {
-        System.out.println(clothId);
+    public List<Cloth> getAllClothes(int userId) {
+        return clothRepository.findAllByUser_UserId(userId);
+    }
+
+    public ClothResponseDto getCloth(int userId, int clothId) {
         Cloth cloth = clothRepository.findByClothId(clothId).orElseThrow(() -> new RuntimeException());
+
+        if (cloth.getUser().getUserId() != userId) {
+            throw new RuntimeException();
+        }
+
         return ClothResponseDto.builder()
                 .user(cloth.getUser())
                 .cloth(cloth)

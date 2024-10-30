@@ -26,14 +26,16 @@ public class StyleService {
     private final ClothRepository clothRepository;
     private final StyleRepository styleRepository;
 
+//    public List<Cloth> recommendedClothes() {
+//
+//    }
+
     @Transactional
     public int uploadStyle(StyleUploadRequestDto styleUploadRequestDto) {
         List<Integer> ids = Arrays.asList(styleUploadRequestDto.getOuterId(), styleUploadRequestDto.getSemiOuterId(),
                 styleUploadRequestDto.getTopId(), styleUploadRequestDto.getBottomId());
         List<Cloth> clothes = clothRepository.findAllByOptionalIds(ids.get(0), ids.get(1), ids.get(2), ids.get(3));
-        for (Cloth cloth : clothes) {
-            System.out.println(cloth.getLargeCategory());
-        }
+
         User user = clothes.get(clothes.size()-1).getUser(); //하의는 무조건 있으므로 상의에서 user의 정보를 받아온다.
 
         //불러운 옷이 없을 때 예외 추가 필요
@@ -43,6 +45,7 @@ public class StyleService {
             order.add(null);
         }
 
+        //outer, semiOuter, top, bottom 순서대로 array에 등록
         List<Integer> clothIds = new ArrayList<>();
         for (Cloth cloth : clothes) {
             if (cloth.getClothId() == ids.get(0))
@@ -56,7 +59,7 @@ public class StyleService {
             clothIds.add(cloth.getClothId());
         }
 
-        //각 옷 wearAt 변경 필요
+        //각 옷의 wearAt 업데이트
         updateClothesWearAt(clothIds);
 
         return styleRepository.save(styleUploadRequestDto.toEntity(user, order.get(0), order.get(1), order.get(2),
