@@ -6,10 +6,8 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 
 @Entity
 @Getter
@@ -39,7 +37,7 @@ public class Style {
     @JoinColumn(name = "bottom_id", referencedColumnName = "clothId")
     private Cloth bottom;
 
-    @Column(name = "wear_at", columnDefinition = "TIMESTAMP")
+    @Column(name = "wear_at")
     private LocalDate wearAt;
 
     @Column(name = "feel_temp", nullable = false)

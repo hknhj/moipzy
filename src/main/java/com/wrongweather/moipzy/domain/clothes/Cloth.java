@@ -12,9 +12,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
-@Entity(name="cloth")
+@Entity
 @Getter
 @NoArgsConstructor
 public class Cloth {
@@ -46,8 +46,9 @@ public class Cloth {
     @Enumerated(value = EnumType.STRING) //@Enumerated 작성안하면 indexOutOfRange 오류 발생
     private Degree degree;
 
-    @Column(name="wear_at", columnDefinition = "TIMESTAMP")
-    private LocalDateTime wearAt;
+    @Column(name="wear_at")
+    @Setter
+    private LocalDate wearAt;
 
     @Builder
     public Cloth(User user, ClothImage clothImage, LargeCategory largeCategory, SmallCategory smallCategory, Degree degree, Color color) {
