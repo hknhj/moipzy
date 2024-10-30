@@ -9,7 +9,6 @@ import lombok.Setter;
 
 @Entity(name="cloth_image")
 @Getter
-@Setter
 @NoArgsConstructor
 public class ClothImage {
 
@@ -23,7 +22,7 @@ public class ClothImage {
 
 
     @Builder
-    public ClothImage(String imgUrl, Cloth cloth) {
+    public ClothImage(String imgUrl) {
         this.imgUrl = imgUrl;
     }
 }

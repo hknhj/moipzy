@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 
 @Entity(name="cloth")
 @Getter
-@Setter
 @NoArgsConstructor
 public class Cloth {
     @Id
