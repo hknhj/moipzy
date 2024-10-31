@@ -6,7 +6,6 @@ import com.wrongweather.moipzy.domain.clothImg.service.ClothImgService;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
-import com.wrongweather.moipzy.domain.clothes.dto.ClothIdResponseDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
 import com.wrongweather.moipzy.domain.users.User;
@@ -27,7 +26,7 @@ public class ClothService {
     private final ClothImgService clothImgService;
 
     @Transactional
-    public ClothIdResponseDto registerCloth(MultipartFile clothImg, ClothRegisterRequestDto clothRegisterRequestDto) {
+    public int registerCloth(MultipartFile clothImg, ClothRegisterRequestDto clothRegisterRequestDto) {
         //유저 정보를 먼저 불러오기
         User user = userRepository.findByUserId(clothRegisterRequestDto.getUserId()).orElseThrow(() -> new RuntimeException());
 
@@ -37,9 +36,7 @@ public class ClothService {
         //옷을 저장하기
         Cloth cloth = clothRepository.save(clothRegisterRequestDto.toEntity(user, clothImage));
 
-        return ClothIdResponseDto.builder()
-                .clothId(cloth.getClothId())
-                .build();
+        return cloth.getClothId();
     }
 
     public ClothResponseDto getCloth(int userId, int clothId) throws RuntimeException {
