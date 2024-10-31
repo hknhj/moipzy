@@ -1,13 +1,19 @@
 package com.wrongweather.moipzy.domain.clothes;
 
+import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface ClothRepository extends JpaRepository<Cloth, Long> {
     Optional<Cloth> findByClothId(int clothId);
+
+    List<Cloth> findAllByUser_UserId(int userId);
+
+    List<Cloth> findAllByLargeCategory(LargeCategory largeCategory);
 
     @Query(value = "SELECT * FROM cloth " +
             "WHERE (:outerId IS NULL OR cloth_id = :outerId) " +
@@ -18,6 +24,4 @@ public interface ClothRepository extends JpaRepository<Cloth, Long> {
                                      @Param("semiOuterId") int semiOuterId,
                                      @Param("topId") int topId,
                                      @Param("bottomId") int bottomId);
-
-    List<Cloth> findAllByUser_UserId(int userId); //User의 UserId로 조회
 }

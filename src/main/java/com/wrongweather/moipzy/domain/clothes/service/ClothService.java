@@ -5,6 +5,7 @@ import com.wrongweather.moipzy.domain.clothImg.ClothImageRepository;
 import com.wrongweather.moipzy.domain.clothImg.service.ClothImgService;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
+import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothIdResponseDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,21 +42,52 @@ public class ClothService {
                 .build();
     }
 
-    public List<Cloth> getAllClothes(int userId) {
-        return clothRepository.findAllByUser_UserId(userId);
-    }
-
-    public ClothResponseDto getCloth(int userId, int clothId) {
+    public ClothResponseDto getCloth(int userId, int clothId) throws RuntimeException {
+        //System.out.println(clothId);
         Cloth cloth = clothRepository.findByClothId(clothId).orElseThrow(() -> new RuntimeException());
-
-        if (cloth.getUser().getUserId() != userId) {
+        if (userId != cloth.getUser().getUserId()) {
             throw new RuntimeException();
         }
-
+        System.out.println(cloth.getClothImg().getImgUrl());
         return ClothResponseDto.builder()
                 .user(cloth.getUser())
                 .cloth(cloth)
                 .build();
     }
 
+    public List<ClothResponseDto> getAllClothes(int userId) {
+        List<Cloth> clothList = clothRepository.findAllByUser_UserId(userId);
+        List<ClothResponseDto> clothResponseDtoList = new ArrayList<>();
+        for (Cloth cloth : clothList) {
+            clothResponseDtoList.add(ClothResponseDto.builder()
+                    .user(cloth.getUser())
+                    .cloth(cloth)
+                    .build());
+        }
+
+        return clothResponseDtoList;
+    }
+
+    public List<ClothResponseDto> getAllOuter(int userId, String largeCategory) throws RuntimeException {
+        LargeCategory temp;
+        if (largeCategory.equals("outer")) {
+            temp=LargeCategory.OUTER;
+        } else if (largeCategory.equals("top")) {
+            temp=LargeCategory.TOP;
+        } else if (largeCategory.equals("bottom")) {
+            temp = LargeCategory.BOTTOM;
+        } else {
+            throw new RuntimeException();
+        }
+        List<Cloth> clothList = clothRepository.findAllByLargeCategory(temp);
+        List<ClothResponseDto> clothResponseDtoList = new ArrayList<>();
+        for (Cloth cloth : clothList) {
+            clothResponseDtoList.add(ClothResponseDto.builder()
+                    .user(cloth.getUser())
+                    .cloth(cloth)
+                    .build());
+        }
+
+        return clothResponseDtoList;
+    }
 }

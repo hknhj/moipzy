@@ -1,6 +1,6 @@
 //package com.wrongweather.moipzy.domain.clothes;
 //
-//import com.wrongweather.moipzy.domain.clothes.category.TopColor;
+//import com.wrongweather.moipzy.domain.clothes.category.Color;
 //import com.wrongweather.moipzy.domain.clothes.category.Degree;
 //import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 //import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
@@ -46,7 +46,7 @@
 //                .largeCategory(LargeCategory.TOP)
 //                .smallCategory(SmallCategory.TShirt)
 //                .cloValue(0.09f)
-//                .color(TopColor.BLUE)
+//                .color(Color.BLUE)
 //                .degree(Degree.FULL)
 //                .build();
 //
@@ -72,7 +72,7 @@
 //                .largeCategory(LargeCategory.TOP)
 //                .smallCategory(SmallCategory.TShirt)
 //                .cloValue(0.09f)
-//                .color(TopColor.BLUE)
+//                .color(Color.BLUE)
 //                .degree(Degree.FULL)
 //                .build();
 //
@@ -86,7 +86,7 @@
 //        assertEquals(clothResponseDto.getLargeCategory(), LargeCategory.TOP);
 //        assertEquals(clothResponseDto.getSmallCategory(), SmallCategory.TShirt);
 //        assertEquals(clothResponseDto.getCloValue(), 0.09f);
-//        assertEquals(clothResponseDto.getColor(), TopColor.BLUE);
+//        assertEquals(clothResponseDto.getColor(), Color.BLUE);
 //        assertEquals(clothResponseDto.getDegree(), Degree.FULL);
 //    }
 //}
