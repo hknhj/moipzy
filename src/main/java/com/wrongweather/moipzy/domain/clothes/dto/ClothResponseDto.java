@@ -16,6 +16,7 @@ public class ClothResponseDto {
     private SmallCategory smallCategory;
     private Color color;
     private Degree degree;
+    private String imgUrl;
 
     @Builder
     public ClothResponseDto(User user, Cloth cloth) {
@@ -24,5 +25,6 @@ public class ClothResponseDto {
         this.smallCategory = cloth.getSmallCategory();
         this.color = cloth.getColor();
         this.degree = cloth.getDegree();
+        this.imgUrl = cloth.getClothImg().getImgUrl();
     }
 }
