@@ -1,5 +1,8 @@
 package com.wrongweather.moipzy.domain.users.service;
 
+import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
+import com.wrongweather.moipzy.domain.temperature.TemperatureRepository;
+import com.wrongweather.moipzy.domain.temperature.service.TemperatureService;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
@@ -17,12 +20,15 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
+    private final TemperatureService temperatureService;
 
     public UserIdResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
         String encodedPassword = encoder.encode(userRegisterRequestDto.getPassword());
 
+        TemperatureRange range = temperatureService.setDefaultRange();
+
         return UserIdResponseDto.builder()
-                .userId(userRepository.save(userRegisterRequestDto.toEntity(encodedPassword)).getUserId())
+                .userId(userRepository.save(userRegisterRequestDto.toEntity(encodedPassword, range)).getUserId())
                 .build();
     }
 
@@ -38,7 +44,7 @@ public class UserService {
         return foundUser;
     }
 
-    public Optional<User> userValid(String email) {
+    private Optional<User> userValid(String email) {
         return userRepository.findByEmail(email);
     }
 }
