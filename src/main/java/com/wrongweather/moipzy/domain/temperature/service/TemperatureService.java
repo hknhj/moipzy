@@ -11,6 +11,10 @@ public class TemperatureService {
 
     private final TemperatureRepository temperatureRepository;
 
+    /**
+     * 유저가 생성되면 default temperature range 설정하는 함수
+     * @return TemperatureRange
+     */
     public TemperatureRange setDefaultRange() {
         TemperatureRange temperatureRange = TemperatureRange.builder()
                 .over28("1,2")

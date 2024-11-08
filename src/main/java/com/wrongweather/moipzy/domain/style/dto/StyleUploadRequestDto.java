@@ -7,18 +7,16 @@ import lombok.Getter;
 
 @Getter
 public class StyleUploadRequestDto {
-    private int userId;
-    private int outerId;
-    private int semiOuterId;
-    private int topId;
-    private int bottomId;
-    private int feelTemp;
+    private Integer userId;
+    private Integer outerId;
+    private Integer topId;
+    private Integer bottomId;
+    private Integer feelTemp;
 
-    public Style toEntity(User user, Cloth outer, Cloth semiOuter, Cloth top, Cloth bottom) {
+    public Style toEntity(User user, Cloth outer, Cloth top, Cloth bottom) {
         return Style.builder()
                 .user(user)
                 .outer(outer)
-                .semiOuter(semiOuter)
                 .top(top)
                 .bottom(bottom)
                 .feelTemp(feelTemp)

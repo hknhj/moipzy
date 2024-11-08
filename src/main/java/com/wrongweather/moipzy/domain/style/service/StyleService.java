@@ -2,9 +2,14 @@ package com.wrongweather.moipzy.domain.style.service;
 
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
+import com.wrongweather.moipzy.domain.style.CombinationRecommend;
 import com.wrongweather.moipzy.domain.style.StyleRepository;
+import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
+import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
+import com.wrongweather.moipzy.domain.temperature.service.TemperatureService;
 import com.wrongweather.moipzy.domain.users.User;
+import com.wrongweather.moipzy.domain.users.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -25,16 +30,24 @@ public class StyleService {
 
     private final ClothRepository clothRepository;
     private final StyleRepository styleRepository;
+    private final UserRepository userRepository;
+    private final CombinationRecommend combinationRecommend;
 
-//    public List<Cloth> recommendedClothes() {
-//
-//    }
+    public List<StyleRecommendResponseDto> recommend(int userId, int feelTemp) {
+
+        User user = userRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException());
+        TemperatureRange range = user.getRange();
+        System.out.println(range.getRangeId());
+        System.out.println(range.getBetween27_24());
+
+        return combinationRecommend.recommend(range, feelTemp);
+    }
 
     @Transactional
     public int uploadStyle(StyleUploadRequestDto styleUploadRequestDto) {
-        List<Integer> ids = Arrays.asList(styleUploadRequestDto.getOuterId(), styleUploadRequestDto.getSemiOuterId(),
+        List<Integer> ids = Arrays.asList(styleUploadRequestDto.getOuterId(),
                 styleUploadRequestDto.getTopId(), styleUploadRequestDto.getBottomId());
-        List<Cloth> clothes = clothRepository.findAllByOptionalIds(ids.get(0), ids.get(1), ids.get(2), ids.get(3));
+        List<Cloth> clothes = clothRepository.findAllByOptionalIds(ids.get(0), ids.get(1), ids.get(2));
 
         User user = clothes.get(clothes.size()-1).getUser(); //하의는 무조건 있으므로 상의에서 user의 정보를 받아온다.
 
@@ -62,8 +75,7 @@ public class StyleService {
         //각 옷의 wearAt 업데이트
         updateClothesWearAt(clothIds);
 
-        return styleRepository.save(styleUploadRequestDto.toEntity(user, order.get(0), order.get(1), order.get(2),
-                order.get(3))).getStyleId();
+        return styleRepository.save(styleUploadRequestDto.toEntity(user, order.get(0), order.get(1), order.get(2))).getStyleId();
     }
 
     @Transactional

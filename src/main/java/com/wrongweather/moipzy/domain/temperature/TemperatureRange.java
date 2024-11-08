@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class TemperatureRange {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int temperatureId;
+    private int rangeId; //DB column 이름과 같아야됨
 
     @Column(nullable = true, length = 50)
     private String over28;

@@ -20,9 +20,10 @@ public class StyleController {
 
     private final StyleService styleService;
 
-    @GetMapping("/recommend/{feelTemp}")
-    public List<StyleRecommendResponseDto> recommend(@PathVariable String feelTemp) {
-        return new ArrayList<>();
+    @GetMapping("/recommend/{userId}/{feelTemp}")
+    public List<StyleRecommendResponseDto> recommend(@PathVariable int userId, @PathVariable int feelTemp) {
+        List<StyleRecommendResponseDto> recommendResponseDtos = styleService.recommend(userId, feelTemp);
+        return recommendResponseDtos;
     }
 
     @PostMapping
