@@ -17,35 +17,47 @@ import java.util.Date;
 import java.util.Map;
 
 @Slf4j
+@Component
 public class JwtTokenUtil {
 
-    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long expireTime = 1000 * 60 * 60;
+    private final SecretKey secretKey;
+    private final long expireTime = 1000 * 60 * 60;
 
-//    public JwtTokenUtil(@Value("${jwt.secret}") String secretKey) {
-//        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-//        this.key = Keys.hmacShaKeyFor(keyBytes);
-//    }
+    //해당 클래스 생성하면서 application.yml에 있는 jwt.secret 값을 넣어준다
+    public JwtTokenUtil(@Value("${jwt.secret}") String secretKey) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+    }
 
-    public static String createToken(int userId, String email, String username) {
+    //토큰 생성
+    public JwtToken createToken(int userId, String email, String username) {
+
+        //유저 정보에 대한 Claim 생성
         Claims claims = Jwts.claims();
         claims.put("userId", userId);
         claims.put("email", email);
         claims.put("username", username);
 
-        return Jwts.builder()
+        //생성된 Claim, 유효기간 등을 설정하고 accessToken 문자열 생성
+        String accessToken =  Jwts.builder()
                 .setSubject(Integer.toString(userId)+" user jwt")
                 .setClaims(claims)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expireTime))
-                .signWith(SECRET_KEY)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+
+        //생성된 accessToken 문자열을 Jwt 에 넣어서 JwtToken 객체로 반환
+        return JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .build();
     }
 
-    public static Claims extractClaims(String accessToken) {
+    public Claims extractClaims(String accessToken) {
         try {
             return Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
+                    .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(accessToken)
                     .getBody();
@@ -54,15 +66,15 @@ public class JwtTokenUtil {
         }
     }
 
-    public static String extractUserId(String token) {
-        // JWT 파싱 로직
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("userId", String.class);
-    }
+//    public String extractUserId(String token) {
+//        // JWT 파싱 로직
+//        Claims claims = Jwts.parserBuilder()
+//                .setSigningKey(SECRET_KEY)
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody();
+//        return claims.get("userId", String.class);
+//    }
 
 //    public static boolean isExpired(String token, String secretKey) {
 //        Date expiredDate = extractClaims(token).getExpiration();

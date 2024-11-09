@@ -23,7 +23,10 @@ public class UserService {
     private final TemperatureService temperatureService;
 
     public UserIdResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
-        String encodedPassword = encoder.encode(userRegisterRequestDto.getPassword());
+        String encodedPassword = null;
+        if(userRegisterRequestDto.getPassword() != null){
+            encodedPassword = encoder.encode(userRegisterRequestDto.getPassword());
+        }
 
         TemperatureRange range = temperatureService.setDefaultRange();
 

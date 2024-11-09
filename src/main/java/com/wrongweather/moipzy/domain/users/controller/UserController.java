@@ -1,5 +1,6 @@
 package com.wrongweather.moipzy.domain.users.controller;
 
+import com.wrongweather.moipzy.domain.jwt.JwtToken;
 import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @PostMapping("/register")
     public UserIdResponseDto register(@Validated @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
@@ -40,10 +42,11 @@ public class UserController {
         User user = userService.login(userLoginRequestDto);
 
         if (user != null) {
-            String token = JwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername());
+            JwtToken token = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername());
+            String accessToken = token.getAccessToken();
             // 헤더에 토큰 추가
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + token);
+            headers.add("Authorization", "Bearer " + accessToken);
             return new ResponseEntity<>(headers, HttpStatus.OK);
         } else {
             return ResponseEntity.status(401).body("Invalid credentials");

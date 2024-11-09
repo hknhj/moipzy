@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class User extends BaseTimeEntity {
+public class User extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
@@ -22,7 +22,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false, length = 50)
     private String email;
 
-    @Column(nullable = false, length = 40)
+    @Column(length = 40)
     private String password;
 
     @Column(nullable = false, length = 30)
@@ -36,5 +36,4 @@ public class User extends BaseTimeEntity {
         this.username = username;
         this.email = email;
     }
-
 }
