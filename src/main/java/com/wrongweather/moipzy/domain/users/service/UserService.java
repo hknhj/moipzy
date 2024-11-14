@@ -33,6 +33,7 @@ public class UserService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    // 회원가입 서비스
     public UserIdResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
 
         String encodedPassword = null;
@@ -47,7 +48,8 @@ public class UserService {
                 .build();
     }
 
-    public User login(UserLoginRequestDto userLoginRequestDto) {
+    // 로그인 후 jwt token 발행 서비스
+    public String login(UserLoginRequestDto userLoginRequestDto) {
         String requestEmail = userLoginRequestDto.getEmail();
         String requestPassword = userLoginRequestDto.getPassword();
 
@@ -56,13 +58,15 @@ public class UserService {
         if(!encoder.matches(requestPassword, foundUser.getPassword())) {
             throw new LoginFailedException();
         }
-        return foundUser;
+
+        JwtToken token = jwtTokenUtil.createToken(foundUser.getUserId(), foundUser.getEmail(), foundUser.getUsername(), "regular", null);
+        return token.getAccessToken();
     }
 
+    // 구글 로그인 서비스
     public String socialLogin(String code) {
         String accessToken = getAccessToken(code);
         JsonNode userResourceNode = getUserResource(accessToken);
-        //System.out.println("userResourceNode = " + userResourceNode);
 
         String id = userResourceNode.get("id").asText();
         String email = userResourceNode.get("email").asText();
@@ -85,6 +89,7 @@ public class UserService {
         return token.getAccessToken();
     }
 
+    // 리디렉션된 code를 가지고 구글의 access_token을 추출하는 함수
     private String getAccessToken(String code) {
         String clientId = env.getProperty("oauth2.google.client-id");
         String clientSecret = env.getProperty("oauth2.google.client-secret");
@@ -108,6 +113,7 @@ public class UserService {
         return accessTokenNode.get("access_token").asText();
     }
 
+    // 구글 로그인을 통해 유저의 정보를 얻어오는 함수
     private JsonNode getUserResource(String accessToken) {
         String resourceUri = env.getProperty("oauth2.google.resource-uri");
 

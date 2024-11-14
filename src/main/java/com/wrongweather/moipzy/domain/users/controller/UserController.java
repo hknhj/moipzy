@@ -34,25 +34,20 @@ public class UserController {
     @Value("${oauth2.google.redirect-uri}")
     private String redirectUri;
 
+    // 일반 회원가입 진행
     @PostMapping("/register")
     public UserIdResponseDto register(@Validated @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
         return userService.register(userRegisterRequestDto);
     }
 
+    // 일반 로그인 진행
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
-        User user = userService.login(userLoginRequestDto);
+        String accessToken = userService.login(userLoginRequestDto);
 
-        if (user != null) {
-            JwtToken token = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername(), "regular", null);
-            String accessToken = token.getAccessToken();
-            // 헤더에 토큰 추가
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", "Bearer " + accessToken);
-            return new ResponseEntity<>(headers, HttpStatus.OK);
-        } else {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        return new ResponseEntity<>(headers, HttpStatus.OK);
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
@@ -69,7 +64,7 @@ public class UserController {
         response.sendRedirect(googleAuthUrl);
     }
 
-    //구글 로그인 진행 후 code가 redirection되는 url
+    //구글 로그인 진행 후 code 를 포함하여 redirection 되는 url
     @GetMapping("/login/google")
     public String googleLogin(@RequestParam String code) {
         String jwtToken = userService.socialLogin(code);
@@ -78,5 +73,4 @@ public class UserController {
         headers.add("Authorization", "Bearer " + jwtToken);
         return jwtToken;
     }
-
 }
