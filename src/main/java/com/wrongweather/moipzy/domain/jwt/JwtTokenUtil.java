@@ -30,13 +30,15 @@ public class JwtTokenUtil {
     }
 
     //토큰 생성
-    public JwtToken createToken(int userId, String email, String username) {
+    public JwtToken createToken(int userId, String email, String username, String loginType, String oauthAccessToken) {
 
         //유저 정보에 대한 Claim 생성
         Claims claims = Jwts.claims();
         claims.put("userId", userId);
         claims.put("email", email);
         claims.put("username", username);
+        claims.put("loginType", loginType);
+        claims.put("oauthAccessToken", oauthAccessToken);
 
         //생성된 Claim, 유효기간 등을 설정하고 accessToken 문자열 생성
         String accessToken =  Jwts.builder()

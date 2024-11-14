@@ -7,19 +7,20 @@ import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
 import com.wrongweather.moipzy.domain.users.service.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
-@RequestMapping("moipzy/users")
+@RequestMapping(value = "/moipzy/users", produces = "application/json")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
@@ -27,22 +28,23 @@ public class UserController {
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
 
+    @Value("${oauth2.google.client-id}")
+    private String clientId;
+
+    @Value("${oauth2.google.redirect-uri}")
+    private String redirectUri;
+
     @PostMapping("/register")
     public UserIdResponseDto register(@Validated @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
         return userService.register(userRegisterRequestDto);
     }
-
-//    @PostMapping("/login")
-//    public UserLoginResponseDto login(@Validated @RequestBody UserLoginRequestDto userLoginRequestDto) {
-//        return userService.login(userLoginRequestDto);
-//    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
         User user = userService.login(userLoginRequestDto);
 
         if (user != null) {
-            JwtToken token = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername());
+            JwtToken token = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername(), "regular", null);
             String accessToken = token.getAccessToken();
             // 헤더에 토큰 추가
             HttpHeaders headers = new HttpHeaders();
@@ -52,4 +54,29 @@ public class UserController {
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
+
+    // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
+    @GetMapping("/google")
+    public void redirectToGoogleAuth(HttpServletResponse response) throws IOException {
+        // Google OAuth2 인증 URL 구성
+        String googleAuthUrl = "https://accounts.google.com/o/oauth2/auth"
+                + "?client_id=" + clientId
+                + "&redirect_uri=" + redirectUri
+                + "&response_type=code"
+                + "&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly";
+
+        // Google OAuth2 페이지로 리다이렉트
+        response.sendRedirect(googleAuthUrl);
+    }
+
+    //구글 로그인 진행 후 code가 redirection되는 url
+    @GetMapping("/login/google")
+    public String googleLogin(@RequestParam String code) {
+        String jwtToken = userService.socialLogin(code);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + jwtToken);
+        return jwtToken;
+    }
+
 }
