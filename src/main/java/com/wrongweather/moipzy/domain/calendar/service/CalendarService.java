@@ -1,5 +1,6 @@
 package com.wrongweather.moipzy.domain.calendar.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -27,21 +27,24 @@ public class CalendarService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public Map<String, List<String>> getTodayAndTomorrowEvents(String accessToken) throws GeneralSecurityException, IOException {
+    public Map<String, List<Map<String, String>>> getEventsByDate(String accessToken, String date) throws IOException {
 
-        Map<String, List<String>> eventMap = new HashMap<>();
+        // Map to store events for the requested date with time
+        Map<String, List<Map<String, String>>> eventMap = new HashMap<>();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        //Formatter for the input date and UTC time conversion
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-        // Get today's date in UTC format
-        String todayStart = LocalDate.now().atStartOfDay(ZoneOffset.UTC).format(formatter);
-        String todayEnd = LocalDate.now().atTime(23, 59, 59).atOffset(ZoneOffset.UTC).format(formatter);
-        String todayUrl = getUrl(todayStart, todayEnd);
+        //Parse the input date
+        LocalDate requestedDate = LocalDate.parse(date, inputFormatter);
 
-        // Get tomorrow's date in UTC format
-        String tomorrowStart = LocalDate.now().plusDays(1).atStartOfDay(ZoneOffset.UTC).format(formatter);
-        String tomorrowEnd = LocalDate.now().plusDays(1).atTime(23, 59, 59).atOffset(ZoneOffset.UTC).format(formatter);
-        String tomorrowUrl = getUrl(tomorrowStart, tomorrowEnd);
+        // Generate start and end times in UTC
+        String startOfDay = requestedDate.atStartOfDay(ZoneOffset.UTC).format(utcFormatter);
+        String endOfDay = requestedDate.atTime(23, 59, 59).atOffset(ZoneOffset.UTC).format(utcFormatter);
+
+        // Get date's url in UTC format
+        String todayUrl = getUrl(startOfDay, endOfDay);
 
         // Authorization 헤더에 Access Token 추가
         HttpHeaders headers = new HttpHeaders();
@@ -51,21 +54,13 @@ public class CalendarService {
         HttpEntity<String> request = new HttpEntity<>(headers);
 
         // Google Calendar API에 오늘 event에 대한 GET 요청
-        ResponseEntity<String> todayResponse = restTemplate.exchange(todayUrl, HttpMethod.GET, request, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(todayUrl, HttpMethod.GET, request, String.class);
 
         // 응답을 반환 (JSON 형식의 일정 데이터)
-        String todayRes =  todayResponse.getBody();
-        List<String> todayEvents = getEvents(todayRes);
+        String responseBody =  response.getBody();
+        List<Map<String, String>> events = getEventsWithTime(responseBody);
 
-        // Google Calendar API에 내일 event에 대한 GET 요청
-        ResponseEntity<String> tomorrowResponse = restTemplate.exchange(tomorrowUrl, HttpMethod.GET, request, String.class);
-
-        // 응답을 반환 (JSON 형식의 일정 데이터)
-        String tomorrowRes =  tomorrowResponse.getBody();
-        List<String> tomorrowEvents = getEvents(tomorrowRes);
-
-        eventMap.put("today", todayEvents);
-        eventMap.put("tomorrow", tomorrowEvents);
+        eventMap.put(date, events);
 
         return eventMap;
     }
@@ -75,21 +70,31 @@ public class CalendarService {
                 + startOfDay + "&timeMax=" + endOfDay + "&singleEvents=true&orderBy=startTime&maxResults=10";
     }
 
-    private List<String> getEvents(String res) throws IOException {
+    private List<Map<String, String>> getEventsWithTime(String res) throws IOException {
 
-        List<String> summaries = new ArrayList<>();
+        List<Map<String, String>> events = new ArrayList<>();
 
-        JsonNode node = mapper.readTree(res);
+        try {
+            JsonNode root = mapper.readTree(res);
+            JsonNode items = root.path("items");
 
-        // "items" 배열 추출
-        JsonNode todayItemsNode = node.path("items");
+            for (JsonNode item : items) {
+                String summary = item.path("summary").asText();
+                String start = item.path("start").path("dateTime").asText();
+                String end = item.path("end").path("dateTime").asText();
 
-        // 각 이벤트의 "summary" 필드 추출
-        for (JsonNode item : todayItemsNode) {
-            String summary = item.path("summary").asText();
-            summaries.add(summary);
+                // Store event information in a map
+                Map<String, String> eventDetails = new HashMap<>();
+                eventDetails.put("summary", summary);
+                eventDetails.put("startTime", start);
+                eventDetails.put("endTime", end);
+
+                events.add(eventDetails);
+            }
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
 
-        return summaries;
+        return events;
     }
 }
