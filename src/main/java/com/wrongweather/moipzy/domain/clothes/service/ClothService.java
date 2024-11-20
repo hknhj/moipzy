@@ -65,7 +65,7 @@ public class ClothService {
         return clothResponseDtoList;
     }
 
-    public List<ClothResponseDto> getAllOuter(int userId, String largeCategory) throws RuntimeException {
+    public List<ClothResponseDto> getAllByLargeCategory(int userId, String largeCategory) throws RuntimeException {
         LargeCategory temp;
         if (largeCategory.equals("outer")) {
             temp=LargeCategory.OUTER;

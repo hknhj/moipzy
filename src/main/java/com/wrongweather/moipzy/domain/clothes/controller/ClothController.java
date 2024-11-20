@@ -63,6 +63,6 @@ public class ClothController {
      */
     @GetMapping("/largeCategory/{userId}")
     public List<ClothResponseDto> getAllOuter(@PathVariable("userId") int userId, @RequestParam String largeCategory) {
-        return clothService.getAllOuter(userId, largeCategory);
+        return clothService.getAllByLargeCategory(userId, largeCategory);
     }
 }
