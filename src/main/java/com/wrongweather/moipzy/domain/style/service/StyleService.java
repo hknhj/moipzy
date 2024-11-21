@@ -6,7 +6,9 @@ import com.wrongweather.moipzy.domain.style.CombinationRecommend;
 import com.wrongweather.moipzy.domain.style.StyleRepository;
 import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
+import com.wrongweather.moipzy.domain.temperature.OuterTempRange;
 import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
+import com.wrongweather.moipzy.domain.temperature.TopTempRange;
 import com.wrongweather.moipzy.domain.temperature.service.TemperatureService;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
@@ -41,6 +43,22 @@ public class StyleService {
         System.out.println(range.getBetween27_24());
 
         return combinationRecommend.recommend(range, feelTemp);
+    }
+
+    public List<List<Cloth>> recommendByHighLow(int userId, int highTemp, int lowTemp) {
+        User user = userRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException());
+        System.out.println("userId: "+userId);
+        OuterTempRange outerTempRange = new OuterTempRange();
+        TopTempRange topTempRange = new TopTempRange();
+        List<List<Cloth>> recommended = combinationRecommend.recommendByHighLow(outerTempRange, topTempRange, highTemp, lowTemp);
+        for (List<Cloth> style : recommended ){
+            System.out.print("list of cloth of style: ");
+            for (Cloth cloth : style) {
+                System.out.print(cloth.getClothId()+" ");
+            }
+            System.out.println();
+        }
+        return recommended;
     }
 
     @Transactional

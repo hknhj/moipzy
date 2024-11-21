@@ -1,7 +1,7 @@
 package com.wrongweather.moipzy.domain.temperature.service;
 
 import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
-import com.wrongweather.moipzy.domain.temperature.TemperatureRepository;
+import com.wrongweather.moipzy.domain.temperature.repository.TemperatureRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
