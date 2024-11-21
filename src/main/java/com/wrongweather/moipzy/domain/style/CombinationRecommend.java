@@ -7,7 +7,9 @@ import com.wrongweather.moipzy.domain.clothes.category.Degree;
 import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
+import com.wrongweather.moipzy.domain.temperature.OuterTempRange;
 import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
+import com.wrongweather.moipzy.domain.temperature.TopTempRange;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +30,11 @@ public class CombinationRecommend implements StyleRecommender {
     //COAT THIN,THICK
     //앞쪽이 이너, 뒷쪽이 아우터
     private final Map<Integer, String> clothCombinations = Map.ofEntries(
-            Map.entry(1, "NORMAL-T_SHIRT"), //바지 모두 가능
-            Map.entry(2, "NORMAL-POLO_SHIRT"), //1번 //스웻, 린넨, 반바지 제외
-            Map.entry(3, "NORMAL-T_SHIRT+THIN-D_SHIRT"), //다 가능
-            Map.entry(4, "THIN-LONG_SLEEVE"), //2번 //다 가능
-            Map.entry(5, "NORMAL-T_SHIRT+NORMAL-D_SHIRT"), //다 가능
+            Map.entry(1, "NORMAL-T_SHIRT"),
+            Map.entry(2, "NORMAL-POLO_SHIRT"), //1번
+            Map.entry(3, "NORMAL-T_SHIRT+THIN-D_SHIRT"),
+            Map.entry(4, "THIN-LONG_SLEEVE"), //2번
+            Map.entry(5, "NORMAL-T_SHIRT+NORMAL-D_SHIRT"),
             Map.entry(6, "NORMAL-T_SHIRT+THIN-OUTER"),
             Map.entry(7, "NORMAL-LONG_SLEEVE"), //3번
             Map.entry(8, "NORMAL-LONG_SLEEVE+NORMAL-D_SHIRT"),
@@ -54,22 +56,53 @@ public class CombinationRecommend implements StyleRecommender {
             Map.entry(24,"THICK-SWEATER+THICK-COAT") //9번
     );
 
-    private final Map<Color, List<Color>> colorCombination = new HashMap<>() {{ // 색 조합
-        put(Color.LIGHTBLUE, Arrays.asList(Color.NAVY, Color.GREEN, Color.BEIGE, Color.RED, Color.BLACK, Color.WHITE, Color.BROWN));
-        put(Color.DEEPBLUE, Arrays.asList(Color.NAVY, Color.GREEN, Color.BEIGE, Color.BLACK, Color.WHITE, Color.BROWN));
-        put(Color.BLACK, Arrays.asList(Color.BLUE, Color.NAVY, Color.GREEN, Color.BEIGE, Color.RED, Color.WHITE, Color.BROWN));
-        put(Color.KHAKI, Arrays.asList(Color.NAVY, Color.BEIGE, Color.BLACK, Color.WHITE));
-        put(Color.CREAM, Arrays.asList(Color.NAVY, Color.BEIGE, Color.RED, Color.BLACK, Color.BROWN));
-        put(Color.BEIGE, Arrays.asList(Color.NAVY, Color.GREEN, Color.RED, Color.BLACK, Color.WHITE));
+    private final Map<Integer, String> topClothing = new HashMap<>() {{
+        put(1, "NORMAL-T_SHIRT");
+        put(2, "NORMAL-POLO_SHIRT");
+        put(3, "THIN-LONG_SLEEVE");
+        put(4, "NORMAL-LONG_SLEEVE");
+        put(5, "NORMAL-D_SHIRT");
+        put(6, "THIN-SWEATER");
+        put(7, "NORMAL-SWEATER");
+        put(8, "THICK-SWEATER");
     }};
+    //sweaterCategories 는 밑에 있음 그거 써라
 
-    private final Map<SmallCategory, List<SmallCategory>> topBottomCombination = new HashMap<>() {{  // 상하의 조합
-        put(SmallCategory.JEANS, Arrays.asList(SmallCategory.T_SHIRT, SmallCategory.POLO_SHIRT, SmallCategory.D_SHIRT, SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT, SmallCategory.LONG_SLEEVE));
-        put(SmallCategory.SWEAT_PANTS, Arrays.asList(SmallCategory.T_SHIRT, SmallCategory.D_SHIRT, SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT, SmallCategory.LONG_SLEEVE));
-        put(SmallCategory.COTTON_PANTS, Arrays.asList(SmallCategory.T_SHIRT, SmallCategory.POLO_SHIRT, SmallCategory.D_SHIRT, SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT, SmallCategory.LONG_SLEEVE));
-        put(SmallCategory.SLACKS, Arrays.asList(SmallCategory.T_SHIRT, SmallCategory.POLO_SHIRT, SmallCategory.D_SHIRT, SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT, SmallCategory.LONG_SLEEVE));
-        put(SmallCategory.LINEN_PANTS, Arrays.asList(SmallCategory.T_SHIRT, SmallCategory.D_SHIRT, SmallCategory.LONG_SLEEVE));
-        put(SmallCategory.SHORTS, Arrays.asList(SmallCategory.T_SHIRT, SmallCategory.D_SHIRT,  SmallCategory.LONG_SLEEVE));
+    private final Map<Integer, String> outerClothing = new HashMap<>() {{
+        put(1, "THIN-D_SHIRT");
+        put(2, "NORMAL-D_SHIRT");
+        put(3, "THICK-D_SHIRT");
+        put(4, "THIN-LIGHT_OUTER");
+        put(5, "NORMAL-LIGHT_OUTER");
+        put(6, "THICK-LIGHT_OUTER");
+        put(7, "NORMAL-MEDIUM_OUTER");
+        put(8, "THICK-MEDIUM_OUTER");
+        put(9, "THIN-PADDING");
+        put(10, "THIN-COAT");
+        put(11, "NORMAL-PADDING");
+        put(12, "THICK-COAT");
+        put(13, "THICK-PADDING");
+    }};
+    private final List<SmallCategory> lightOuterCategories = Arrays.asList(
+            SmallCategory.CARDIGAN, SmallCategory.DENIM_JACKET, SmallCategory.BLOUSON,
+            SmallCategory.BLAZER, SmallCategory.LEATHER_JACKET, SmallCategory.HOODED
+    );
+
+    private final List<SmallCategory> mediumOuterCategories = Arrays.asList(
+            SmallCategory.MA1, SmallCategory.STADIUM_JACKET, SmallCategory.JACKET
+    );
+
+
+    private final Map<Color, List<Color>> topBottomNotGoodColorCombination = new HashMap<>() {{ // 색 조합
+        put(Color.BLUE, Arrays.asList(Color.LIGHTBLUE, Color.DEEPBLUE, Color.KHAKI, Color.BEIGE));
+        put(Color.NAVY, null);
+        put(Color.GREEN, Arrays.asList(Color.KHAKI, Color.BEIGE));
+        put(Color.BLACK, null);
+        put(Color.WHITE, Arrays.asList(Color.CREAM));
+        put(Color.BEIGE, null);
+        put(Color.RED, Arrays.asList(Color.KHAKI));
+        put(Color.BROWN, Arrays.asList(Color.KHAKI));
+        put(Color.LIGHTGREY, Arrays.asList(Color.CREAM));
     }};
 
     private final Map<SmallCategory, List<SmallCategory>> topBottomNotGoodCombination = new HashMap<>() {{
@@ -82,19 +115,57 @@ public class CombinationRecommend implements StyleRecommender {
         put(SmallCategory.LONG_SLEEVE, null);
     }};
 
-    List<SmallCategory> notGoodWithOuter = Arrays.asList(SmallCategory.LINEN_PANTS, SmallCategory.SHORTS);
+    List<SmallCategory> bottomNotGoodWithOuter = Arrays.asList(SmallCategory.LINEN_PANTS, SmallCategory.SHORTS);
     private final Map<SmallCategory, List<SmallCategory>> outerBottomNotGoodCombination = new HashMap<>() {{
         put(SmallCategory.D_SHIRT, null);
-        put(SmallCategory.CARDIGAN, notGoodWithOuter);
+        put(SmallCategory.CARDIGAN, bottomNotGoodWithOuter);
         put(SmallCategory.DENIM_JACKET, Arrays.asList(SmallCategory.JEANS, SmallCategory.LINEN_PANTS, SmallCategory.SHORTS));
         put(SmallCategory.BLOUSON, Arrays.asList(SmallCategory.LINEN_PANTS, SmallCategory.SHORTS, SmallCategory.SWEAT_PANTS));
-        put(SmallCategory.BLAZER, notGoodWithOuter);
-        put(SmallCategory.LEATHER_JACKET, notGoodWithOuter);
-        put(SmallCategory.HOODED, notGoodWithOuter);
-        put(SmallCategory.MA1, notGoodWithOuter);
-        put(SmallCategory.STADIUM_JACKET, notGoodWithOuter);
-        put(SmallCategory.COAT, notGoodWithOuter);
-        put(SmallCategory.PADDING, notGoodWithOuter);
+        put(SmallCategory.BLAZER, bottomNotGoodWithOuter);
+        put(SmallCategory.LEATHER_JACKET, bottomNotGoodWithOuter);
+        put(SmallCategory.HOODED, bottomNotGoodWithOuter);
+        put(SmallCategory.MA1, bottomNotGoodWithOuter);
+        put(SmallCategory.STADIUM_JACKET, bottomNotGoodWithOuter);
+        put(SmallCategory.COAT, bottomNotGoodWithOuter);
+        put(SmallCategory.PADDING, bottomNotGoodWithOuter);
+    }};
+
+    private final Map<Color, List<Color>> outerBottomNotGoodColorCombination = new HashMap<>() {{
+        put(Color.NAVY, null);
+        put(Color.BLACK, null);
+        put(Color.BROWN, Arrays.asList(Color.KHAKI, Color.BEIGE));
+        put(Color.BEIGE, null);
+        put(Color.LIGHTGREY, Arrays.asList(Color.BEIGE));
+        put(Color.RED, Arrays.asList(Color.KHAKI, Color.BEIGE));
+        put(Color.BLUE, Arrays.asList(Color.BEIGE));
+        put(Color.CHARCOAL, null);
+        put(Color.WHITE, Arrays.asList(Color.CREAM, Color.BEIGE));
+    }};
+
+    List<SmallCategory> topNotGoodWithOuter = Arrays.asList(SmallCategory.POLO_SHIRT, SmallCategory.D_SHIRT, SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT);
+    private final Map<SmallCategory, List<SmallCategory>> outerTopNotGoodCombination = new HashMap<>() {{
+        put(SmallCategory.D_SHIRT, topNotGoodWithOuter);
+        put(SmallCategory.CARDIGAN, Arrays.asList(SmallCategory.POLO_SHIRT, SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT));
+        put(SmallCategory.DENIM_JACKET, Arrays.asList(SmallCategory.POLO_SHIRT, SmallCategory.D_SHIRT));
+        put(SmallCategory.BLOUSON, Arrays.asList(SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT));
+        put(SmallCategory.BLAZER, null);
+        put(SmallCategory.LEATHER_JACKET, null);
+        put(SmallCategory.HOODED, topNotGoodWithOuter);
+        put(SmallCategory.MA1, Arrays.asList(SmallCategory.POLO_SHIRT));
+        put(SmallCategory.STADIUM_JACKET, Arrays.asList(SmallCategory.POLO_SHIRT));
+        put(SmallCategory.COAT, Arrays.asList(SmallCategory.POLO_SHIRT));
+        put(SmallCategory.PADDING, null);
+    }};
+
+    //같은 색 조건문으로 처리
+    private final Map<Color, List<Color>> outerTopNotGoodColorCombination = new HashMap<>() {{
+        put(Color.NAVY, Arrays.asList(Color.GREEN));
+        put(Color.BLACK, null);
+        put(Color.BROWN, Arrays.asList(Color.BLUE, Color.GREEN));
+        put(Color.BEIGE, null);
+        put(Color.LIGHTGREY, Arrays.asList(Color.GREEN));
+        put(Color.RED, Arrays.asList(Color.BLUE, Color.GREEN, Color.BROWN));
+        put(Color.BLUE, Arrays.asList(Color.BEIGE));
     }};
 
     private final Map<Integer, List<Degree>> bottomRange = new HashMap<>() {{ // 바지 두께 구간
@@ -109,13 +180,15 @@ public class CombinationRecommend implements StyleRecommender {
         put(9, Arrays.asList(Degree.NORMAL, Degree.LTHICK, Degree.THICK));
     }};
 
-    private final List<SmallCategory> outerCategories = Arrays.asList(SmallCategory.CARDIGAN, SmallCategory.DENIM_JACKET,
+    private final List<SmallCategory> outerCategories = Arrays.asList(
+            SmallCategory.CARDIGAN, SmallCategory.DENIM_JACKET,
             SmallCategory.BLOUSON, SmallCategory.BLAZER, SmallCategory.LEATHER_JACKET,
-            SmallCategory.HOODED, SmallCategory.MA1, SmallCategory.STADIUM_JACKET);
+            SmallCategory.HOODED, SmallCategory.MA1, SmallCategory.STADIUM_JACKET
+    );
 
-    private final List<SmallCategory> sweaterCategories = Arrays.asList(SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT);
-
-
+    private final List<SmallCategory> sweaterCategories = Arrays.asList(
+            SmallCategory.HOODIE, SmallCategory.SWEAT_SHIRT, SmallCategory.KNIT
+    );
 
     @Override
     public List<StyleRecommendResponseDto> recommend(TemperatureRange range, int feelTemp) {
@@ -140,88 +213,204 @@ public class CombinationRecommend implements StyleRecommender {
         //상의 :  List<List<Cloth>> _> 1번 index가 이너
         //상의 조합 최대 3개 추천
         //바지에 맞도록 상의 추천
+        //일교차가 크면 최고기온이 더우면 안에는 얇게, 최저기온 추우면 겉옷은 두껍게
+
+        // 상하의 : <null, top, bottom>
+        // 아우터 : <outer, top, bottom>
+        List<List<Cloth>> validCombination = new ArrayList<>();
         for (List<ClothItem> combination : combinations) {
             System.out.println("combination 1's type: " + combination.get(0).getType());
             if (combination.size() == 1) { //상의만 있는 경우
+
+                //smallCategory 및 Degree 추출
                 List<SmallCategory> smallCategory = toSmallCategory(combination.get(0).getType());
                 Degree degree = toDegree(combination.get(0).getThickness());
+
+                //SmallCategory 와 Degree를 토대로 상의 리스트 추출
                 List<Cloth> topList = clothRepository.findAllBySmallCategoryAndDegree(smallCategory, degree);
+
+                //최근에 안입은 순서대로 sorting
                 List<Cloth> sortedTopList= topList.stream()
                         .sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder())))
                         .toList();
-                Cloth top = sortedTopList.get(0);
-                System.out.println("상의 1개만 추천됐을 때 상의 id: " + top.getClothId());
 
+                //바지를 Degree 를 토대로 추출
                 List<Cloth> bottomList = clothRepository.findAllByDegreeAndLargeCategory(getBottomDegree(feelTemp), LargeCategory.BOTTOM);
+
+                //최근에 안입은 순서대로 sorting
                 List<Cloth> sortedBottomList = bottomList.stream()
                         .sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder())))
                         .toList();
-                SmallCategory topCategory = top.getSmallCategory();
-                Cloth bottom = null;
-                for (Cloth sortedBottom : sortedBottomList) {
-                    SmallCategory bottomCategory = sortedBottom.getSmallCategory();
 
-                    List<SmallCategory> notGoodBottoms = topBottomNotGoodCombination.get(topCategory);
+                for (Cloth top : sortedTopList) {
+                    for (Cloth bottom : sortedBottomList) {
+                        // Check if category combination is valid
+                        List<SmallCategory> invalidBottomCategories = topBottomNotGoodCombination.get(top.getSmallCategory());
+                        if (invalidBottomCategories != null && invalidBottomCategories.contains(bottom.getSmallCategory())) {
+                            continue; // Skip this combination
+                        }
 
-                    if(notGoodBottoms == null || !notGoodBottoms.contains(bottomCategory)) {
-                        bottom = sortedBottom;
-                        break;
+                        // Check if color combination is valid
+                        List<Color> invalidBottomColors = topBottomNotGoodColorCombination.get(top.getColor());
+                        if (invalidBottomColors != null && invalidBottomColors.contains(bottom.getColor()) && top.getColor() != bottom.getColor()) {
+                            continue; // Skip this combination
+                        }
+
+                        validCombination.add(Arrays.asList(null, top, bottom));
                     }
                 }
-                System.out.println("상의 1개만 추천됐을 때 하의 id: " + bottom.getClothId());
-                styleResponseDtos.add(StyleRecommendResponseDto.builder()
-                        .topId(top.getClothId())
-                        .bottomId(bottom.getClothId())
-                        .build());
-            } else if(combination.size() == 2) {
+//                System.out.println("상의 1개만 추천됐을 때 하의 id: " + bottom.getClothId());
+//                styleResponseDtos.add(StyleRecommendResponseDto.builder()
+//                        .topId(top.getClothId())
+//                        .bottomId(bottom.getClothId())
+//                        .build());
+            }
+            else if(combination.size() == 2) {
+
+                // 상의 리스트 추출 및 sorting
                 List<SmallCategory> innerCategoryList = toSmallCategory(combination.get(0).getType());
                 Degree innerDegree = toDegree(combination.get(0).getThickness());
-                System.out.println("2개 추천됐을 때 상의 CategoryList: " + innerCategoryList);
+                //System.out.println("2개 추천됐을 때 상의 CategoryList: " + innerCategoryList);
                 List<Cloth> topList = clothRepository.findAllBySmallCategoryAndDegree(innerCategoryList, innerDegree);
-                List<Cloth> sortedInnerList= topList.stream()
+                List<Cloth> sortedTopList= topList.stream()
                         .sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder())))
                         .toList();
-                Cloth inner = sortedInnerList.get(0);
 
+                //아우터 리스트 추출 및 sorting
                 List<SmallCategory> outerCategoryList = toSmallCategory(combination.get(1).getType());
                 Degree outerDegree = toDegree(combination.get(1).getThickness());
-                System.out.println("2개 추천됐을 때 상의 CategoryList: " + outerCategoryList);
+                //System.out.println("2개 추천됐을 때 상의 CategoryList: " + outerCategoryList);
                 List<Cloth> outerList = clothRepository.findAllBySmallCategoryAndDegree(outerCategoryList, outerDegree);
                 List<Cloth> sortedOuterList= outerList.stream()
                         .sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder())))
                         .toList();
-                //Cloth outer = sortedOuterList.get(0);
-                Cloth outer = null;
-                if (!sortedOuterList.isEmpty()) {
-                    outer = sortedOuterList.get(0);
-                }
 
-                List<Cloth> bottomList = clothRepository.findAllByDegreeAndLargeCategory(getBottomDegree(feelTemp),LargeCategory.BOTTOM);
+                //바지를 Degree 를 토대로 추출
+                List<Cloth> bottomList = clothRepository.findAllByDegreeAndLargeCategory(getBottomDegree(feelTemp), LargeCategory.BOTTOM);
+
+                //최근에 안입은 순서대로 sorting
                 List<Cloth> sortedBottomList = bottomList.stream()
                         .sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder())))
                         .toList();
 
-                SmallCategory outerCategory = outer.getSmallCategory();
-                Cloth bottom = null;
-                for (Cloth sortedBottom : sortedBottomList) {
-                    SmallCategory bottomCategory = sortedBottom.getSmallCategory();
+                List<List<Cloth>> styles = new ArrayList<>();
 
-                    List<SmallCategory> notGoodBottoms = outerBottomNotGoodCombination.get(outerCategory);
+                //아우터와 하의 먼저 for 문을 통해 valid combination 추출
+                for (Cloth outer : sortedOuterList) {
+                    for (Cloth bottom : sortedBottomList) {
+                        // Check if category combination is valid
+                        List<SmallCategory> invalidBottomCategories = outerBottomNotGoodCombination.get(outer.getSmallCategory());
+                        if (invalidBottomCategories != null && invalidBottomCategories.contains(bottom.getSmallCategory())) {
+                            continue; // Skip this combination
+                        }
 
-                    if(notGoodBottoms == null || !notGoodBottoms.contains(bottomCategory)) {
-                        bottom = sortedBottom;
-                        break;
+                        // Check if color combination is valid
+                        List<Color> invalidBottomColors = outerBottomNotGoodColorCombination.get(outer.getColor());
+                        if (invalidBottomColors != null && invalidBottomColors.contains(bottom.getColor())) {
+                            continue; // Skip this combination
+                        }
+
+                        styles.add(Arrays.asList(outer, null , bottom));
                     }
                 }
-                styleResponseDtos.add(StyleRecommendResponseDto.builder()
-                        .outerId(outer.getClothId())
-                        .topId(inner.getClothId())
-                        .bottomId(bottom.getClothId())
-                        .build());
+
+                //아우터 상의 for 문을 통해 valid combination 추출
+                for (List<Cloth> style : styles) {
+                    // Check if category combination is valid
+                    Cloth outer = style.get(0);
+                    for (Cloth top : sortedTopList) {
+                        List<SmallCategory> invalidTopCategories = outerTopNotGoodCombination.get(outer.getSmallCategory());
+                        if (invalidTopCategories != null && invalidTopCategories.contains(top.getSmallCategory())) {
+                            continue; // Skip this combination
+                        }
+
+                        // Check if color combination is valid
+                        List<Color> invalidTopColors = outerTopNotGoodColorCombination.get(outer.getColor());
+                        if (invalidTopColors != null && invalidTopColors.contains(top.getColor()) && outer.getColor() != top.getColor()) {
+                            continue; // Skip this combination
+                        }
+
+                        style.set(1, top);
+                    }
+
+                }
             }
         }
 
         return styleResponseDtos;
+    }
+
+    @Override
+    public List<List<Cloth>> recommendByHighLow(OuterTempRange outerTempRange, TopTempRange topTempRange, int highTemp, int lowTemp) {
+
+        String outerStr = "7,10"; //"THICK-MEDIUM_OUTER", "THICK-COAT
+        String topStr = "4,7"; //"NORMAL-LONG_SLEEVE", "NORMAL-SWEATER"
+
+        System.out.println("recommendByHighLow");
+
+        // 문자열을 숫자로 변경
+        List<Integer> outerInt = convertStringToList(outerStr); //보통 MEDIUM 아우터, 두꺼운 코트
+        List<Integer> topInt = convertStringToList(topStr);  //롱슬리브, (보통스웨터)
+
+        // 숫자를 토대로 옷 종류 얻음
+        List<String> outerCategory = outerInt.stream().map(outerClothing::get).filter(Objects::nonNull).collect(Collectors.toList()); //NORMAL-MEDIUM_OUTER, THICK-COAT
+        List<String> topCategory = topInt.stream().map(topClothing::get).filter(Objects::nonNull).collect(Collectors.toList()); // NORMAL-LONG_SLEEVE, NORMAL-SWEATER
+
+        // 두께와 옷 종류 구분
+        List<ClothItem> outerItems = parseThicknessAndCategory(outerCategory); //(NORMAL, MEDIUM_OUTER), (THICK, COAT)
+        List<ClothItem> topItems = parseThicknessAndCategory(topCategory); //(NORMAL, LONG_SLEEVE), (NORMAl, SWEATER)
+
+        // 평균온도 계산
+        int feelTemp = (highTemp+lowTemp)/2;
+
+        // 평균온도를 토대로 바지 리스트 얻음
+        List<Cloth> bottomList = clothRepository.findAllByDegreeAndLargeCategory(getBottomDegree(feelTemp), LargeCategory.BOTTOM);
+
+        //Outer, Top, Bottom 추출 및 최근에 안입은 순서대로 sorting
+        List<Cloth> sortedOuterList = getClothAndSort(outerItems);
+        List<Cloth> sortedTopList = getClothAndSort(topItems);
+        List<Cloth> sortedBottomList = bottomList.stream().sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder()))).toList();
+
+        for (Cloth outer : sortedOuterList) {
+            System.out.print(outer.getClothId()+" ");
+        }
+        System.out.println();
+        for (Cloth top : sortedTopList) {
+            System.out.print(top.getClothId()+" ");
+        }
+        System.out.println();
+        for (Cloth bottom : sortedBottomList) {
+            System.out.print(bottom.getClothId()+" ");
+        }
+        System.out.println();
+
+        List<List<Cloth>> styles = new ArrayList<>();
+
+        //겉옷, 하의 먼저 valid combination 추출
+        for (Cloth outer : sortedOuterList) {
+            for (Cloth bottom : sortedBottomList) {
+                List<SmallCategory> invalidBottomCategories = outerBottomNotGoodCombination.get(outer.getSmallCategory());
+                if (invalidBottomCategories != null && invalidBottomCategories.contains(bottom.getSmallCategory())) {
+                    continue; // Skip this combination
+                }
+
+                // Check if color combination is valid
+                List<Color> invalidBottomColors = outerBottomNotGoodColorCombination.get(outer.getColor());
+                if (invalidBottomColors != null && invalidBottomColors.contains(bottom.getColor()) && outer.getColor() != bottom.getColor()) {
+                    continue; // Skip this combination
+                }
+
+                styles.add(Arrays.asList(outer, null, bottom));
+            }
+        }
+
+        for (List<Cloth> style : styles) {
+            for (Cloth top : sortedTopList) {
+                style.set(1, top);
+            }
+        }
+
+        return styles;
     }
 
     /**
@@ -230,6 +419,9 @@ public class CombinationRecommend implements StyleRecommender {
      * @param feelTemp
      * @return feelTemp를 토대로 해당 구간에 있는 옷의 조합의 번호를 추출하여 List<Integer>로 반환
      */
+
+    //----------------------------------------------
+    //recommend method 에서 사용하는 method
     private List<Integer> getRange(TemperatureRange range, int feelTemp) {
         String temp;
         if (feelTemp >= 28) {
@@ -272,7 +464,7 @@ public class CombinationRecommend implements StyleRecommender {
 
     private ClothItem parseItem(String item) {
         //문자열을 -로 우선 나눔
-        String parts[] = item.split("-");
+        String[] parts = item.split("-");
         //앞쪽이 두께이므로 parts[0]을 두께에 넣기
         String thickness;
         String type;
@@ -330,56 +522,14 @@ public class CombinationRecommend implements StyleRecommender {
             case "SWEATER" -> {
                 return sweaterCategories;
             }
+            case "LIGHT-OUTER" -> {
+                return lightOuterCategories;
+            }
+            case "MEDIUM-OUTER" -> {
+                return mediumOuterCategories;
+            }
         }
         return null;
-    }
-
-    private List<Cloth> getBottom(int feelTemp) {
-        List<Degree> bottomDegree;
-
-        //온도구간으로 바지 두께 추출
-        if (feelTemp >= 28) {
-            bottomDegree =  bottomRange.get(1);
-        } else if (feelTemp >= 24) {
-            bottomDegree =  bottomRange.get(2);
-        } else if (feelTemp >= 20) {
-            bottomDegree =  bottomRange.get(3);
-        } else if (feelTemp >= 17) {
-            bottomDegree =  bottomRange.get(4);
-        } else if (feelTemp >= 14) {
-            bottomDegree =  bottomRange.get(5);
-        } else if (feelTemp >= 11) {
-            bottomDegree =  bottomRange.get(6);
-        } else if (feelTemp >= 8) {
-            bottomDegree =  bottomRange.get(7);
-        } else if (feelTemp >= 5) {
-            bottomDegree =  bottomRange.get(8);
-        } else {
-            bottomDegree =  bottomRange.get(9);
-        }
-
-        List<Cloth> bottom = clothRepository.findAllByDegreeAndLargeCategory(bottomDegree, LargeCategory.BOTTOM);
-
-        if (bottom == null || bottom.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 1. 최근 착용 날짜를 기준으로 오름차순 정렬 (최근에 입지 않은 옷이 후순위)
-        List<Cloth> sortedBottom = bottom.stream()
-                .sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder())))
-                .toList();
-
-        Random random = new Random();
-        List<Cloth> selectedBottom = new ArrayList<>();
-
-        // 2. 랜덤하게 최대 2개를 추출하여 반환한다.
-        for (int i = 0; i < 2 && i < sortedBottom.size(); i++) {
-            int randomIndex = random.nextInt(sortedBottom.size() - i);
-            selectedBottom.add(sortedBottom.get(randomIndex));
-            Collections.swap(sortedBottom, randomIndex, sortedBottom.size() - i - 1); // 뒤쪽으로 밀어서 다시 선택되지 않도록
-        }
-
-        return selectedBottom;
     }
 
     private List<Degree> getBottomDegree(int feelTemp) {
@@ -422,6 +572,45 @@ public class CombinationRecommend implements StyleRecommender {
         }
         return combinations;
     }
+    //----------------------------------------------
 
+
+    //----------------------------------------------
+    private List<Integer> convertStringToList(String input) {
+        if (input == null || input.isEmpty()) {
+            return null;
+        }
+
+        return Arrays.stream(input.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+    }
+
+    private List<ClothItem> parseThicknessAndCategory(List<String> inputs) {
+        List<ClothItem> thicknessAndCategory = new ArrayList<>();
+        for (String input : inputs) {
+            String[] parts = input.split("-");
+            String thickness = parts[0];
+            String category = parts[1];
+            thicknessAndCategory.add(new ClothItem(thickness, category));
+        }
+
+        return thicknessAndCategory;
+    }
+
+    private List<Cloth> getClothAndSort(List<ClothItem> clothItems) {
+        List<Cloth> clothes = new ArrayList<>();
+        for (ClothItem clothItem : clothItems) {
+            Degree degree = toDegree(clothItem.getThickness());
+            List<SmallCategory> smallCategory = toSmallCategory(clothItem.getType());
+
+            List<Cloth> outerList = clothRepository.findAllBySmallCategoryAndDegree(smallCategory, degree);
+            clothes.addAll(outerList);
+        }
+
+        return clothes.stream().sorted(Comparator.comparing(Cloth::getWearAt, Comparator.nullsFirst(Comparator.naturalOrder()))).toList();
+    }
+    //----------------------------------------------
 }
 

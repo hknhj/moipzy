@@ -1,5 +1,6 @@
 package com.wrongweather.moipzy.domain.clothes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wrongweather.moipzy.domain.clothImg.ClothImage;
 import com.wrongweather.moipzy.domain.clothes.category.Color;
 import com.wrongweather.moipzy.domain.clothes.category.Degree;
@@ -24,9 +25,10 @@ public class Cloth {
 
     @ManyToOne(fetch = FetchType.LAZY) //유저 정보 거의 필요 없음
     @JoinColumn(name = "user_id")
+    @JsonIgnore // 순환 참조 방지
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cloth_img_id")
     private ClothImage clothImg;
 
