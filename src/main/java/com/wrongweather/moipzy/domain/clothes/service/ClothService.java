@@ -137,6 +137,7 @@ public class ClothService {
         return clothResponseDtoList;
     }
 
+    // 옷 큰분류 기준으로 옷 온도 범위 설정
     private List<Integer> getLowHighTemp(Cloth cloth) {
         //1번 인덱스가 low temp, 2번 인덱스가 high temp
         List<Integer> tempList = Arrays.asList(null, null);
@@ -150,6 +151,7 @@ public class ClothService {
         return tempList;
     }
 
+    // 아우터의 온도 범위 설정
     private List<Integer> getOuterLowHighTemp(Cloth cloth) {
 
         //1번 인덱스가 low temp, 2번 인덱스가 high temp
@@ -188,6 +190,7 @@ public class ClothService {
         return tempList;
     }
 
+    // 상의의 온도 범위 설정
     private List<Integer> getTopLowHighTemp(Cloth cloth) {
         List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getSmallCategory().equals(SmallCategory.T_SHIRT)) {
@@ -212,6 +215,7 @@ public class ClothService {
         return tempList;
     }
 
+    // 하의의 온도 범위 설정
     private List<Integer> getBottomLowHighTemp(Cloth cloth) {
         List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getSmallCategory().equals(SmallCategory.SHORTS)) {
@@ -235,7 +239,7 @@ public class ClothService {
         return tempList;
     }
 
-    // 아우터 없이 상의만 입을 때
+    // 아우터 없이 상의만 입을 때 온도 범위 설정
     private List<Integer> getSoloTopLowHighTemp(Cloth cloth) {
         List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getSmallCategory().equals(SmallCategory.T_SHIRT)) {
@@ -260,7 +264,16 @@ public class ClothService {
         return tempList;
     }
 
-    // 셔츠를 아우터로 입을 때 (solo_high_temp, solo_low_temp)
+    // 셔츠를 이너로 입을 때 온도 범위 설정(solo_high_temp, solo_low_temp)
+    private List<Integer> getShirtTopLowHighTemp(Cloth cloth) {
+        List<Integer> tempList = Arrays.asList(null, null);
+        if (cloth.getDegree().equals(Degree.NORMAL)) {
+            tempList = Arrays.asList(9, 16);
+        }
+        return tempList;
+    }
+
+    // 셔츠를 아우터로 입을 때 온도 범위 설정(high_temp, low_temp)
     private List<Integer> getShirtOuterLowHighTemp(Cloth cloth) {
         List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getDegree().equals(Degree.THIN)) {
@@ -273,12 +286,5 @@ public class ClothService {
         return tempList;
     }
 
-    // 셔츠를 이너로 입을 때
-    private List<Integer> getShirtTopLowHighTemp(Cloth cloth) {
-        List<Integer> tempList = Arrays.asList(null, null);
-        if (cloth.getDegree().equals(Degree.NORMAL)) {
-            tempList = Arrays.asList(9, 16);
-        }
-        return tempList;
-    }
+
 }

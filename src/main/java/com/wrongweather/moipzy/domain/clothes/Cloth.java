@@ -68,6 +68,17 @@ public class Cloth {
     @Setter
     private int soloLowTemperature;
 
+    @Override
+    public String toString() {
+        return "Cloth{" +
+                "clothId=" + clothId +
+                ", largeCategory=" + largeCategory +
+                ", smallCategory=" + smallCategory +
+                ", color=" + color +
+                ", wearAt=" + (wearAt != null ? wearAt.toString() : "null") +
+                '}';
+    }
+
     @Builder
     public Cloth(User user, ClothImage clothImage, LargeCategory largeCategory, SmallCategory smallCategory, Degree degree, Color color, int highTemperature, int lowTemperature, int soloHighTemperature, int soloLowTemperature) {
         this.user = user;
