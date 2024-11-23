@@ -1,7 +1,6 @@
 package com.wrongweather.moipzy.domain.clothes.service;
 
 import com.wrongweather.moipzy.domain.clothImg.ClothImage;
-import com.wrongweather.moipzy.domain.clothImg.ClothImageRepository;
 import com.wrongweather.moipzy.domain.clothImg.service.ClothImgService;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
@@ -32,6 +31,9 @@ public class ClothService {
     List<SmallCategory> mediumOuterList = Arrays.asList(SmallCategory.MA1, SmallCategory.STADIUM_JACKET, SmallCategory.LEATHER_JACKET, SmallCategory.JACKET);
     List<SmallCategory> sweaterList = Arrays.asList(SmallCategory.SWEAT_SHIRT, SmallCategory.HOODIE, SmallCategory.KNIT);
 
+    private final int INF_HIGH_TEMPERATURE = 70;
+    private final int INF_LOW_TEMPERATURE = -70;
+
     @Transactional
     public int registerCloth(MultipartFile clothImg, ClothRegisterRequestDto clothRegisterRequestDto) {
         //유저 정보를 먼저 불러오기
@@ -44,13 +46,42 @@ public class ClothService {
         Cloth cloth = clothRegisterRequestDto.toEntity(user, clothImage);
 
         //옷 온도 구간 설정
-        List<Integer> tempList = getLowHighTemp(cloth);
-        cloth.setLowTemperature(tempList.get(0));
-        cloth.setHighTemperature(tempList.get(1));
+        if (!cloth.getSmallCategory().equals(SmallCategory.D_SHIRT)) {
+            List<Integer> tempList = getLowHighTemp(cloth);
 
-        List<Integer> soloTempList = getSoloLowHighTemp(cloth);
-        cloth.setSoloLowTemperature(soloTempList.get(0));
-        cloth.setSoloHighTemperature(soloTempList.get(1));
+            if (tempList.get(0) != null) {
+                cloth.setLowTemperature(tempList.get(0));
+            }
+            if (tempList.get(1) != null) {
+                cloth.setHighTemperature(tempList.get(1));
+            }
+
+            List<Integer> soloTempList = getSoloTopLowHighTemp(cloth);
+
+            if (soloTempList.get(0) != null) {
+                cloth.setSoloLowTemperature(soloTempList.get(0));
+            }
+            if (soloTempList.get(1) != null) {
+                cloth.setSoloHighTemperature(soloTempList.get(1));
+            }
+        }
+        else {
+            List<Integer> tempList = getShirtOuterLowHighTemp(cloth);
+            if (tempList.get(0) != null) {
+                cloth.setLowTemperature(tempList.get(0));
+            }
+            if (tempList.get(1) != null) {
+                cloth.setHighTemperature(tempList.get(1));
+            }
+
+            List<Integer> soloTempList = getSoloShirtTopLowHighTemp(cloth);
+            if (soloTempList.get(0) != null) {
+                cloth.setSoloLowTemperature(soloTempList.get(0));
+            }
+            if (soloTempList.get(1) != null) {
+                cloth.setSoloHighTemperature(soloTempList.get(1));
+            }
+        }
 
         return clothRepository.save(cloth).getClothId();
     }
@@ -106,7 +137,7 @@ public class ClothService {
 
     private List<Integer> getLowHighTemp(Cloth cloth) {
         //1번 인덱스가 low temp, 2번 인덱스가 high temp
-        List<Integer> tempList = null;
+        List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getLargeCategory().equals(LargeCategory.OUTER)) {
             tempList = getOuterLowHighTemp(cloth);
         } else if (cloth.getLargeCategory().equals(LargeCategory.TOP)) {
@@ -120,18 +151,9 @@ public class ClothService {
     private List<Integer> getOuterLowHighTemp(Cloth cloth) {
 
         //1번 인덱스가 low temp, 2번 인덱스가 high temp
-        List<Integer> tempList = null;
+        List<Integer> tempList = Arrays.asList(null, null);
 
-        if (cloth.getSmallCategory().equals(SmallCategory.D_SHIRT)) { //셔츠 아우터로 입을 때
-            if (cloth.getDegree().equals(Degree.THIN)) {
-                tempList = Arrays.asList(24, 27);
-            } else if (cloth.getDegree().equals(Degree.NORMAL)) {
-                tempList = Arrays.asList(17, 23);
-            } else if (cloth.getDegree().equals(Degree.THICK)) {
-                tempList = Arrays.asList(13, 16);
-            }
-        }
-        else if (lightOuterList.contains(cloth.getSmallCategory())) {
+        if (lightOuterList.contains(cloth.getSmallCategory())) {
             if (cloth.getDegree().equals(Degree.THIN)) {
                 tempList = Arrays.asList(17, 19);
             } else if (cloth.getDegree().equals(Degree.NORMAL)) {
@@ -139,17 +161,17 @@ public class ClothService {
             }
         }
         else if (mediumOuterList.contains(cloth.getSmallCategory())) {
-            if (cloth.getDegree().equals(Degree.THIN)) {
-                tempList = Arrays.asList(9, 12);
-            } else if (cloth.getDegree().equals(Degree.NORMAL)) {
-                tempList = Arrays.asList(5, 8);
+            if (cloth.getDegree().equals(Degree.NORMAL)) {
+                tempList = Arrays.asList(11, 14);
+            } else if (cloth.getDegree().equals(Degree.THICK)) {
+                tempList = Arrays.asList(6, 10);
             }
         }
         else if (cloth.getSmallCategory().equals(SmallCategory.COAT)) {
             if (cloth.getDegree().equals(Degree.NORMAL)) {
                 tempList = Arrays.asList(9, 12);
             } else if (cloth.getDegree().equals(Degree.THICK)) {
-                tempList = Arrays.asList(5, 8);
+                tempList = Arrays.asList(INF_LOW_TEMPERATURE, 8);
             }
         }
         else if (cloth.getSmallCategory().equals(SmallCategory.PADDING)) {
@@ -158,71 +180,67 @@ public class ClothService {
             } else if (cloth.getDegree().equals(Degree.NORMAL)) {
                 tempList = Arrays.asList(5, 8);
             } else if (cloth.getDegree().equals(Degree.THICK)) {
-                tempList = Arrays.asList(null, 4);
+                tempList = Arrays.asList(INF_LOW_TEMPERATURE, 4);
             }
         }
         return tempList;
     }
 
     private List<Integer> getTopLowHighTemp(Cloth cloth) {
-        List<Integer> tempList = null;
+        List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getSmallCategory().equals(SmallCategory.T_SHIRT)) {
-            tempList = Arrays.asList(24, null);
-        }
-        else if (cloth.getSmallCategory().equals(SmallCategory.D_SHIRT)) {
-            if (cloth.getDegree().equals(Degree.NORMAL)) {
-                tempList = Arrays.asList(9, 16);
-            }
-        }
-        else if (cloth.getSmallCategory().equals(SmallCategory.LONG_SLEEVE)) {
+            tempList = Arrays.asList(24, INF_HIGH_TEMPERATURE);
+        } else if (cloth.getSmallCategory().equals(SmallCategory.POLO_SHIRT)) {
+            tempList = Arrays.asList(24, INF_HIGH_TEMPERATURE);
+        } else if (cloth.getSmallCategory().equals(SmallCategory.LONG_SLEEVE)) {
             if (cloth.getDegree().equals(Degree.THIN)) {
                 tempList = Arrays.asList(20, 23);
             } else if (cloth.getDegree().equals(Degree.NORMAL)) {
                 tempList = Arrays.asList(15, 19);
             }
-        }
-        else if (sweaterList.contains(cloth.getSmallCategory())) {
+        } else if (sweaterList.contains(cloth.getSmallCategory())) {
             if (cloth.getDegree().equals(Degree.THIN)) {
                 tempList = Arrays.asList(13, 16);
             } else if (cloth.getDegree().equals(Degree.NORMAL)) {
-                tempList = Arrays.asList(null, 12);
+                tempList = Arrays.asList(INF_LOW_TEMPERATURE, 12);
             } else if (cloth.getDegree().equals(Degree.THICK)) {
-                tempList = Arrays.asList(null, 8);
+                tempList = Arrays.asList(INF_LOW_TEMPERATURE, 8);
             }
         }
         return tempList;
     }
 
     private List<Integer> getBottomLowHighTemp(Cloth cloth) {
-        List<Integer> tempList = null;
+        List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getSmallCategory().equals(SmallCategory.SHORTS)) {
-            tempList = Arrays.asList(28, null);
+            tempList = Arrays.asList(28, INF_HIGH_TEMPERATURE);
         }
         else if (cloth.getDegree().equals(Degree.THIN)) {
-            tempList = Arrays.asList(24, null);
+            tempList = Arrays.asList(24, INF_HIGH_TEMPERATURE);
         }
         else if (cloth.getDegree().equals(Degree.LTHIN)) {
             tempList = Arrays.asList(17, 27);
         }
         else if (cloth.getDegree().equals(Degree.NORMAL)) {
-            tempList = Arrays.asList(null, 23);
+            tempList = Arrays.asList(INF_LOW_TEMPERATURE, 23);
         }
         else if (cloth.getDegree().equals(Degree.LTHICK)) {
-            tempList = Arrays.asList(null, 16);
+            tempList = Arrays.asList(INF_LOW_TEMPERATURE, 16);
         }
         else if (cloth.getDegree().equals(Degree.THICK)) {
-            tempList = Arrays.asList(null, 8);
+            tempList = Arrays.asList(INF_LOW_TEMPERATURE, 8);
         }
         return tempList;
     }
 
-    private List<Integer> getSoloLowHighTemp(Cloth cloth) {
-        List<Integer> tempList = null;
+    // 아우터 없이 상의만 입을 때
+    private List<Integer> getSoloTopLowHighTemp(Cloth cloth) {
+        List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getSmallCategory().equals(SmallCategory.T_SHIRT)) {
-            tempList = Arrays.asList(25, null);
+            tempList = Arrays.asList(26, INF_HIGH_TEMPERATURE);
         }
         else if (cloth.getSmallCategory().equals(SmallCategory.POLO_SHIRT)) {
-            tempList = Arrays.asList(24, null);
+            tempList = Arrays.asList(24, 30);
         }
         else if (cloth.getSmallCategory().equals(SmallCategory.LONG_SLEEVE)) {
             if (cloth.getDegree().equals(Degree.THIN)) {
@@ -236,6 +254,27 @@ public class ClothService {
             } else if (cloth.getDegree().equals(Degree.NORMAL)) {
                 tempList = Arrays.asList(13, 16);
             }
+        }
+        return tempList;
+    }
+
+    // 셔츠를 아우터로 입을 때 (solo_high_temp, solo_low_temp)
+    private List<Integer> getShirtOuterLowHighTemp(Cloth cloth) {
+        List<Integer> tempList = Arrays.asList(null, null);
+        if (cloth.getDegree().equals(Degree.THIN)) {
+            tempList = Arrays.asList(24, 27);
+        } else if (cloth.getDegree().equals(Degree.NORMAL)) {
+            tempList = Arrays.asList(17, 23);
+        } else if (cloth.getDegree().equals(Degree.THICK)) {
+            tempList = Arrays.asList(13, 16);
+        }
+        return tempList;
+    }
+
+    private List<Integer> getSoloShirtTopLowHighTemp(Cloth cloth) {
+        List<Integer> tempList = Arrays.asList(null, null);
+        if (cloth.getDegree().equals(Degree.NORMAL)) {
+            tempList = Arrays.asList(9, 16);
         }
         return tempList;
     }
