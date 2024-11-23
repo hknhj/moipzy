@@ -66,20 +66,22 @@ public class ClothService {
             }
         }
         else {
+            // 셔츠를 아우터로 입을 때 (solo_high, solo_low)
             List<Integer> tempList = getShirtOuterLowHighTemp(cloth);
             if (tempList.get(0) != null) {
-                cloth.setLowTemperature(tempList.get(0));
+                cloth.setSoloLowTemperature(tempList.get(0));
             }
             if (tempList.get(1) != null) {
-                cloth.setHighTemperature(tempList.get(1));
+                cloth.setSoloHighTemperature(tempList.get(1));
             }
 
-            List<Integer> soloTempList = getSoloShirtTopLowHighTemp(cloth);
+            // 셔츠를 이너로 입을 때
+            List<Integer> soloTempList = getShirtTopLowHighTemp(cloth);
             if (soloTempList.get(0) != null) {
-                cloth.setSoloLowTemperature(soloTempList.get(0));
+                cloth.setLowTemperature(soloTempList.get(0));
             }
             if (soloTempList.get(1) != null) {
-                cloth.setSoloHighTemperature(soloTempList.get(1));
+                cloth.setHighTemperature(soloTempList.get(1));
             }
         }
 
@@ -271,7 +273,8 @@ public class ClothService {
         return tempList;
     }
 
-    private List<Integer> getSoloShirtTopLowHighTemp(Cloth cloth) {
+    // 셔츠를 이너로 입을 때
+    private List<Integer> getShirtTopLowHighTemp(Cloth cloth) {
         List<Integer> tempList = Arrays.asList(null, null);
         if (cloth.getDegree().equals(Degree.NORMAL)) {
             tempList = Arrays.asList(9, 16);
