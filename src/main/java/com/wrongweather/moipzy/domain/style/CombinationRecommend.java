@@ -413,6 +413,25 @@ public class CombinationRecommend implements StyleRecommender {
         return styles;
     }
 
+    public List<List<Cloth>> recommendByHighLowTemp(int highTemp, int lowTemp) {
+        List<Cloth> outerList = clothRepository.findByLargeCategoryAndTemperatureInRange(LargeCategory.OUTER, lowTemp);
+        List<Cloth> topList = clothRepository.findByLargeCategoryAndTemperatureInRange(LargeCategory.TOP, highTemp);
+        List<Cloth> bottomList = clothRepository.findByLargeCategoryAndTemperatureInRange(LargeCategory.BOTTOM, (highTemp+lowTemp)/2);
+        for (Cloth outer : outerList) {
+            System.out.print(outer.getClothId()+" ");
+        }
+        System.out.println();
+        for (Cloth top : topList) {
+            System.out.print(top.getClothId()+" ");
+        }
+        System.out.println();
+        for (Cloth bottom : bottomList) {
+            System.out.print(bottom.getClothId()+" ");
+        }
+        System.out.println();
+        return Arrays.asList(outerList, topList, bottomList);
+    }
+
     /**
      *
      * @param range

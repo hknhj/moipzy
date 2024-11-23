@@ -1,5 +1,7 @@
 package com.wrongweather.moipzy.domain.style.service;
 
+import com.wrongweather.moipzy.domain.calendar.service.CalendarService;
+import com.wrongweather.moipzy.domain.chatGPT.service.ChatGPTService;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.style.CombinationRecommend;
@@ -9,7 +11,6 @@ import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
 import com.wrongweather.moipzy.domain.temperature.OuterTempRange;
 import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
 import com.wrongweather.moipzy.domain.temperature.TopTempRange;
-import com.wrongweather.moipzy.domain.temperature.service.TemperatureService;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -34,6 +35,8 @@ public class StyleService {
     private final StyleRepository styleRepository;
     private final UserRepository userRepository;
     private final CombinationRecommend combinationRecommend;
+    private final ChatGPTService chatGPTService;
+    private final CalendarService calendarService;
 
     public List<StyleRecommendResponseDto> recommend(int userId, int feelTemp) {
 
@@ -47,7 +50,7 @@ public class StyleService {
 
     public List<List<Cloth>> recommendByHighLow(int userId, int highTemp, int lowTemp) {
         User user = userRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException());
-        System.out.println("userId: "+userId);
+        System.out.println("userId: "+user.getUserId());
         OuterTempRange outerTempRange = new OuterTempRange();
         TopTempRange topTempRange = new TopTempRange();
         List<List<Cloth>> recommended = combinationRecommend.recommendByHighLow(outerTempRange, topTempRange, highTemp, lowTemp);
@@ -59,6 +62,18 @@ public class StyleService {
             System.out.println();
         }
         return recommended;
+    }
+
+    public String recommendTest(int highTemp, int lowTemp) {
+        String prompt = "";
+        List<List<Cloth>> clothList = combinationRecommend.recommendByHighLowTemp(highTemp, lowTemp);
+        for (List<Cloth> cloth : clothList) {
+            for (Cloth cloth1 : cloth) {
+                prompt += cloth1.toString() + ' ';
+            }
+        }
+        System.out.println(prompt);
+        return chatGPTService.getChatGPTResponse(prompt);
     }
 
     @Transactional

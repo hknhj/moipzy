@@ -33,6 +33,10 @@ public interface ClothRepository extends JpaRepository<Cloth, Long> {
     @Query(value = "SELECT c FROM Cloth c WHERE c.smallCategory IN :categories AND c.degree = :degree")
     List<Cloth> findAllBySmallCategoryAndDegree(@Param("categories") List<SmallCategory> categories, Degree degree);
 
-    @Query(value = "SELECT c FROM Cloth c WHERE c.degree IN :degrees AND c.largeCategory = :largeCategory") //동적쿼리를 사용할 때에는 nativeQuery=true를  추가해야한다.
+    @Query(value = "SELECT c FROM Cloth c WHERE c.degree IN :degrees AND c.largeCategory = :largeCategory")
+        //동적쿼리를 사용할 때에는 nativeQuery=true를  추가해야한다.
     List<Cloth> findAllByDegreeAndLargeCategory(@Param("degrees") List<Degree> degrees, @Param("largeCategory") LargeCategory largeCategory);
+
+    @Query("SELECT c FROM Cloth c WHERE :inputTemp BETWEEN c.lowTemperature AND c.highTemperature AND c.largeCategory = :largeCategory")
+    List<Cloth> findByLargeCategoryAndTemperatureInRange(@Param("largeCategory") LargeCategory largeCategory, @Param("inputTemp") int inputTemp);
 }

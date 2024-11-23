@@ -35,10 +35,15 @@ public class StyleController {
         return recommended;
     }
 
+    @GetMapping("/recommendTest")
+    public String recommendList(@RequestParam int highTemp, @RequestParam int lowTemp) {
+        String recommended = styleService.recommendTest(highTemp, lowTemp);
+        return recommended;
+    }
     @PostMapping
     public ResponseEntity<String> uploadStyle(@RequestBody StyleUploadRequestDto styleUploadRequestDto) {
         int uploadedStyleId = styleService.uploadStyle(styleUploadRequestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("옷차림 등록 완료. Id: "+ uploadedStyleId);
+        return ResponseEntity.status(HttpStatus.CREATED).body("옷차림 등록 완료. Id: " + uploadedStyleId);
     }
 }
