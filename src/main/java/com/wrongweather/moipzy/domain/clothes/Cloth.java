@@ -52,13 +52,33 @@ public class Cloth {
     @Setter
     private LocalDate wearAt;
 
+    @Column(name="high_temp")
+    @Setter
+    private int highTemperature;
+
+    @Column(name = "low_temp")
+    @Setter
+    private int lowTemperature;
+
+    @Column(name = "solo_high_temp")
+    @Setter
+    private int soloHighTemperature;
+
+    @Column(name = "solo_low_temp")
+    @Setter
+    private int soloLowTemperature;
+
     @Builder
-    public Cloth(User user, ClothImage clothImage, LargeCategory largeCategory, SmallCategory smallCategory, Degree degree, Color color) {
+    public Cloth(User user, ClothImage clothImage, LargeCategory largeCategory, SmallCategory smallCategory, Degree degree, Color color, int highTemperature, int lowTemperature, int soloHighTemperature, int soloLowTemperature) {
         this.user = user;
         this.clothImg = clothImage;
         this.largeCategory = largeCategory;
         this.smallCategory = smallCategory;
         this.degree = degree;
         this.color = color;
+        this.highTemperature = highTemperature;
+        this.lowTemperature = lowTemperature;
+        this.soloHighTemperature = soloHighTemperature;
+        this.soloLowTemperature = soloLowTemperature;
     }
 }
