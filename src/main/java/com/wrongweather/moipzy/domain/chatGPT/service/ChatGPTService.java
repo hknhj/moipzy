@@ -42,29 +42,29 @@ public class ChatGPTService {
                                 {
                                   "outfits": [
                                     {
-                                      "style": "neat",
+                                      "style": "choose one from (neat / semi-casual / comfortable)",
                                       "combination": {
-                                        "outer": "[outer description]",
-                                        "top": "[top description]",
-                                        "bottom": "[bottom description]"
+                                        "outer": "[outer's cloth id in provided list of cloth]",
+                                        "top": "[top's cloth id in provided list of cloth]",
+                                        "bottom": "[bottom's cloth id in provided list of cloth]"
                                       },
                                       "explanation": "[explanation text]"
                                     },
                                     {
-                                      "style": "semi-casual",
+                                      "style": "choose one from (neat / semi-casual / comfortable)",
                                       "combination": {
-                                        "outer": "[outer description]",
-                                        "top": "[top description]",
-                                        "bottom": "[bottom description]"
+                                        "outer": "[outer's cloth id in provided list of cloth]",
+                                        "top": "[top's cloth id in provided list of cloth]",
+                                        "bottom": "[bottom's cloth id in provided list of cloth]"
                                       },
                                       "explanation": "[explanation text]"
                                     },
                                     {
-                                      "style": "comfortable",
+                                      "style": "choose one from (neat / semi-casual / comfortable)",
                                       "combination": {
-                                        "outer": "[outer description]",
-                                        "top": "[top description]",
-                                        "bottom": "[bottom description]"
+                                        "outer": "[outer's cloth id in provided list of cloth]",
+                                        "top": "[top's cloth id in provided list of cloth]",
+                                        "bottom": "[bottom's cloth id in provided list of cloth]"
                                       },
                                       "explanation": "[explanation text]"
                                     }
@@ -106,7 +106,7 @@ public class ChatGPTService {
                            - For formal looks, prioritize clean designs like slacks, cotton pants, and blazers.
                            - For semi-casual outfits, outerwear like cardigans, denim jackets, stadium jackets, MA1, or leather jackets is preferred.
                            - Do not recommend knit/hoodie/sweatshirt with cardigan, denim_jacket, blouson, blazer, hooded
-                           - Recommend style 
+                           - D-SHIRT can be worn as either outer or top.
                         
                         5. **Responding to user input**:
                            - When the user provides a schedule and a list of clothes, prioritize the schedule and recommend outfits accordingly.
@@ -115,9 +115,9 @@ public class ChatGPTService {
                         
                         Follow these guidelines closely when making recommendations.
                         """),
-                        Map.of("role", "user", "content", prompt+ " \"Based on the available clothing options, recommend upto three outfits. Provide the output strictly in the following JSON structure without any additional text:")
+                        Map.of("role", "user", "content", prompt+ "Based on the available clothing options, recommend upto three outfits. Provide the output strictly in the following JSON structure without any additional text:")
                 },
-                "max_tokens", 1000
+                "max_tokens", 1500
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);

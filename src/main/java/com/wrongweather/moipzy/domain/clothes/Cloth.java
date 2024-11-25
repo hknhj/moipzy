@@ -75,6 +75,7 @@ public class Cloth {
                 ", largeCategory=" + largeCategory +
                 ", smallCategory=" + smallCategory +
                 ", color=" + color +
+                ", degree=" + degree +
                 ", wearAt=" + (wearAt != null ? wearAt.toString() : "null") +
                 '}';
     }
