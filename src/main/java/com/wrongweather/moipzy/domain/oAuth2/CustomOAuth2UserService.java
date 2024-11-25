@@ -1,7 +1,5 @@
 package com.wrongweather.moipzy.domain.oAuth2;
 
-import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
-import com.wrongweather.moipzy.domain.temperature.service.TemperatureService;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import lombok.RequiredArgsConstructor;
