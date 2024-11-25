@@ -21,7 +21,6 @@ import java.util.Map;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
-    private final TemperatureService temperatureService;
 
     @Transactional
     @Override
@@ -46,7 +45,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // DB 조회한 결과 user가 있으면 넘어가고, 없으면 user 등록
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             String name = oAuth2User.getAttribute("name");
-            TemperatureRange range = temperatureService.setDefaultRange();
             //System.out.println("유저 등록 안되어있으니까 등록");
             log.info("유저 등록 안되어있으니까 등록");
 
@@ -54,7 +52,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .email(email)
                     .username(name)
                     .password(null)
-                    .range(range)
                     .build());
         });
 

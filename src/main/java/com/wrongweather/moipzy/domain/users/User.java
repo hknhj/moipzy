@@ -1,7 +1,6 @@
 package com.wrongweather.moipzy.domain.users;
 
 import com.wrongweather.moipzy.domain.BaseTimeEntity;
-import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,10 +14,6 @@ public class User extends BaseTimeEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "range_id")
-    private TemperatureRange range;
-
     @Column(nullable = false, length = 50)
     private String email;
 
@@ -30,9 +25,8 @@ public class User extends BaseTimeEntity{
 
 
     @Builder
-    public User(String password, TemperatureRange range, String username, String email) {
+    public User(String password, String username, String email) {
         this.password = password;
-        this.range = range;
         this.username = username;
         this.email = email;
     }

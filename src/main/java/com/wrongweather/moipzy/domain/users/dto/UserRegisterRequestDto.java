@@ -1,6 +1,5 @@
 package com.wrongweather.moipzy.domain.users.dto;
 
-import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
 import com.wrongweather.moipzy.domain.users.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,11 +17,10 @@ public class UserRegisterRequestDto {
         this.username = username;
     }
 
-    public User toEntity(String password, TemperatureRange range) {
+    public User toEntity(String password) {
         return User.builder()
                 .email(email)
                 .password(password)
-                .range(range)
                 .username(username)
                 .build();
     }

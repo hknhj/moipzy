@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("moipzy/clothes")
+@RequestMapping("/moipzy/clothes")
 @RequiredArgsConstructor
 @Slf4j
 public class ClothController {

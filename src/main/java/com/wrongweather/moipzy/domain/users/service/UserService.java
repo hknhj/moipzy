@@ -3,8 +3,6 @@ package com.wrongweather.moipzy.domain.users.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wrongweather.moipzy.domain.jwt.JwtToken;
 import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
-import com.wrongweather.moipzy.domain.temperature.TemperatureRange;
-import com.wrongweather.moipzy.domain.temperature.service.TemperatureService;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
@@ -27,7 +25,6 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
-    private final TemperatureService temperatureService;
     private final JwtTokenUtil jwtTokenUtil;
     private final Environment env;
 
@@ -41,10 +38,8 @@ public class UserService {
             encodedPassword = encoder.encode(userRegisterRequestDto.getPassword());
         }
 
-        TemperatureRange range = temperatureService.setDefaultRange();
-
         return UserIdResponseDto.builder()
-                .userId(userRepository.save(userRegisterRequestDto.toEntity(encodedPassword, range)).getUserId())
+                .userId(userRepository.save(userRegisterRequestDto.toEntity(encodedPassword)).getUserId())
                 .build();
     }
 
@@ -72,15 +67,12 @@ public class UserService {
         String email = userResourceNode.get("email").asText();
         String nickname = userResourceNode.get("name").asText();
 
-        TemperatureRange range = temperatureService.setDefaultRange();
-
         // 이메일로 찾았을 때 있으면 반환하고, 없으면 유저 등록
         // 원래는 orElse만 사용했었는데, orElse는 값을 생성하기 전에 항상 실행되기 때문에, 무조건 실행됨
         // 따라서 orElseGet을 사용하면 Optional이 비어 있을 때에만 실행되므로 유저가 없을 때만 새로운 유저를 저장할 수 있습니다.
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> userRepository.save(User.builder()
                         .email(email)
-                        .range(range)
                         .password(null)
                         .username(nickname)
                         .build()));
