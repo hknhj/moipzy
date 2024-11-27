@@ -11,15 +11,17 @@ public class StyleUploadRequestDto {
     private Integer outerId;
     private Integer topId;
     private Integer bottomId;
-    private Integer feelTemp;
+    private Integer highTemp;
+    private Integer lowTemp;
 
-    public Style toEntity(User user, Cloth outer, Cloth top, Cloth bottom) {
+    public Style toEntity(User user, Cloth outer, Cloth top, Cloth bottom, int highTemp, int lowTemp) {
         return Style.builder()
                 .user(user)
                 .outer(outer)
                 .top(top)
                 .bottom(bottom)
-                .feelTemp(feelTemp)
+                .highTemp(highTemp)
+                .lowTemp(lowTemp)
                 .build();
     }
 }

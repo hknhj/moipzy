@@ -19,7 +19,7 @@ public class StyleController {
 
     @GetMapping("/recommend")
     public String recommendList(@RequestParam int highTemp, @RequestParam int lowTemp) {
-        String recommended = styleService.recommendTest(highTemp, lowTemp);
+        String recommended = styleService.recommend(highTemp, lowTemp);
         return recommended;
     }
 

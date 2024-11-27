@@ -25,8 +25,6 @@ public class ClothImgService {
 
     public ClothImage uploadImage(MultipartFile image) {
         try {
-            // 이미지 파일 저장을 위한 경로 설정
-            //String uploadsDir = "src/main/resources/static/uploads/clothes/";
 
             // 이미지 파일 경로를 저장
             String dbFilePath = saveImage(image, uploadDir);

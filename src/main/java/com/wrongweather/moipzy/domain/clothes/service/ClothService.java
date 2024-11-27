@@ -40,6 +40,7 @@ public class ClothService {
         User user = userRepository.findByUserId(clothRegisterRequestDto.getUserId()).orElseThrow(() -> new RuntimeException());
 
         //사진을 저장하기
+        //ec2에 사진 저장할 때 해당 디렉토리의 소유자, 그룹을 ubuntu로 바꾸고, 권한을 ubuntu로 변경해야한다
         ClothImage clothImage = clothImgService.uploadImage(clothImg);
 
         //옷 추출

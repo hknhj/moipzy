@@ -22,35 +22,34 @@ public class Style {
     private User user;
 
     @OneToOne
-    @JoinColumn(name = "outer_id", referencedColumnName = "clothId")
+    @JoinColumn(name = "outer_id")
     private Cloth outer;
 
     @OneToOne
-    @JoinColumn(name = "semi_outer_id", referencedColumnName = "clothId")
-    private Cloth semiOuter;
-
-    @OneToOne
-    @JoinColumn(name = "top_id", referencedColumnName = "clothId")
+    @JoinColumn(name = "top_id")
     private Cloth top;
 
     @OneToOne
-    @JoinColumn(name = "bottom_id", referencedColumnName = "clothId")
+    @JoinColumn(name = "bottom_id")
     private Cloth bottom;
 
     @Column(name = "wear_at")
     private LocalDate wearAt;
 
-    @Column(name = "feel_temp", nullable = false)
-    private int feelTemp;
+    @Column(name = "highTemp", nullable = false)
+    private int highTemp;
+
+    @Column(name = "lowTemp", nullable = false)
+    private int lowTemp;
 
     @Builder
-    public Style(User user, Cloth outer, Cloth semiOuter, Cloth top, Cloth bottom, int feelTemp) {
+    public Style(User user, Cloth outer, Cloth top, Cloth bottom, int highTemp, int lowTemp) {
         this.user = user;
         this.outer = outer;
-        this.semiOuter = semiOuter;
         this.top = top;
         this.bottom = bottom;
-        this.feelTemp = feelTemp;
         this.wearAt = LocalDate.now();
+        this.highTemp = highTemp;
+        this.lowTemp = lowTemp;
     }
 }

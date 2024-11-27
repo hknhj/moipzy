@@ -5,36 +5,29 @@ import com.wrongweather.moipzy.domain.chatGPT.service.ChatGPTService;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.style.CombinationRecommend;
+import com.wrongweather.moipzy.domain.style.Style;
 import com.wrongweather.moipzy.domain.style.StyleRepository;
 import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class StyleService {
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
     private final ClothRepository clothRepository;
     private final StyleRepository styleRepository;
     private final UserRepository userRepository;
     private final CombinationRecommend combinationRecommend;
     private final ChatGPTService chatGPTService;
-    private final CalendarService calendarService;
 
-    public String recommendTest(int highTemp, int lowTemp) {
+    public String recommend(int highTemp, int lowTemp) {
         String prompt = "";
         List<List<Cloth>> clothList = combinationRecommend.recommendByHighLowTemp(highTemp, lowTemp);
         for (List<Cloth> cloth : clothList) {
@@ -48,44 +41,42 @@ public class StyleService {
 
     @Transactional
     public int uploadStyle(StyleUploadRequestDto styleUploadRequestDto) {
-        List<Integer> ids = Arrays.asList(styleUploadRequestDto.getOuterId(),
-                styleUploadRequestDto.getTopId(), styleUploadRequestDto.getBottomId());
-        List<Cloth> clothes = clothRepository.findAllByOptionalIds(ids.get(0), ids.get(1), ids.get(2));
 
-        User user = clothes.get(clothes.size()-1).getUser(); //하의는 무조건 있으므로 상의에서 user의 정보를 받아온다.
+        User user = userRepository.findByUserId(styleUploadRequestDto.getUserId()).orElse(null);
 
-        //불러운 옷이 없을 때 예외 추가 필요
+        // 각 부위 Cloth entity or null 추출
+        Cloth outer = findClothById(styleUploadRequestDto.getOuterId());
+        Cloth top = findClothById(styleUploadRequestDto.getTopId());
+        Cloth bottom = findClothById(styleUploadRequestDto.getBottomId());
 
-        List<Cloth> order = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            order.add(null);
-        }
+        // 각 옷의 wearAt 오늘 날짜로 갱신
+        updateClothWearAt(outer);
+        updateClothWearAt(top);
+        updateClothWearAt(bottom);
 
-        //outer, semiOuter, top, bottom 순서대로 array에 등록
-        List<Integer> clothIds = new ArrayList<>();
-        for (Cloth cloth : clothes) {
-            if (cloth.getClothId() == ids.get(0))
-                order.set(0, cloth);
-            else if (cloth.getClothId() == ids.get(1))
-                order.set(1, cloth);
-            else if(cloth.getClothId() == ids.get(2))
-                order.set(2, cloth);
-            else
-                order.set(3, cloth);
-            clothIds.add(cloth.getClothId());
-        }
-
-        //각 옷의 wearAt 업데이트
-        updateClothesWearAt(clothIds);
-
-        return styleRepository.save(styleUploadRequestDto.toEntity(user, order.get(0), order.get(1), order.get(2))).getStyleId();
+        return styleRepository.save(Style.builder()
+                .user(user)
+                .outer(outer)
+                .top(top)
+                .bottom(bottom)
+                .highTemp(styleUploadRequestDto.getHighTemp())
+                .lowTemp(styleUploadRequestDto.getLowTemp())
+                .build())
+                .getStyleId();
     }
 
     @Transactional
-    public void updateClothesWearAt(List<Integer> clothIds) {
-        entityManager.createQuery("UPDATE Cloth c SET c.wearAt = :now WHERE c.clothId IN :ids")
-                .setParameter("now", LocalDate.now())
-                .setParameter("ids", clothIds)
-                .executeUpdate();
+    public void updateClothWearAt(Cloth cloth) {
+        if(cloth == null) return;
+        Cloth foundCloth = clothRepository.findByClothId(cloth.getClothId())
+                .orElseThrow(() -> new IllegalArgumentException("Cloth not found: " + cloth.getClothId()));
+        foundCloth.setWearAt(LocalDate.now());
+    }
+
+    private Cloth findClothById(Integer clothId) {
+        if (clothId == null) {
+            return null;
+        }
+        return clothRepository.findByClothId(clothId).orElse(null);
     }
 }
