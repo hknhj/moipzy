@@ -23,7 +23,6 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false, length = 30)
     private String username;
 
-
     @Builder
     public User(String password, String username, String email) {
         this.password = password;

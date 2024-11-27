@@ -54,11 +54,14 @@ public class UserController {
     @GetMapping("/google")
     public void redirectToGoogleAuth(HttpServletResponse response) throws IOException {
         // Google OAuth2 인증 URL 구성
-        String googleAuthUrl = "https://accounts.google.com/o/oauth2/auth"
-                + "?client_id=" + clientId
+        String googleAuthUrl = "https://accounts.google.com/o/oauth2/auth?"
+                + "client_id=" + clientId
                 + "&redirect_uri=" + redirectUri
+                + "&access_type=offline"
                 + "&response_type=code"
-                + "&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly";
+                + "&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly"
+                + "&prompt=consent"; //얘 하나때문에 몇시간을 씨발아
+
 
         // Google OAuth2 페이지로 리다이렉트
         response.sendRedirect(googleAuthUrl);

@@ -3,6 +3,8 @@ package com.wrongweather.moipzy.domain.users.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.wrongweather.moipzy.domain.jwt.JwtToken;
 import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
+import com.wrongweather.moipzy.domain.token.Token;
+import com.wrongweather.moipzy.domain.token.TokenRepository;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
@@ -14,16 +16,21 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
     private final BCryptPasswordEncoder encoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final Environment env;
@@ -59,8 +66,11 @@ public class UserService {
     }
 
     // 구글 로그인 서비스
+    @Transactional
     public String socialLogin(String code) {
-        String accessToken = getAccessToken(code);
+        List<String> tokens = getAccessToken(code);
+        String accessToken = tokens.get(0);
+        String refreshToken = tokens.get(1);
         JsonNode userResourceNode = getUserResource(accessToken);
 
         String id = userResourceNode.get("id").asText();
@@ -75,14 +85,24 @@ public class UserService {
                         .email(email)
                         .password(null)
                         .username(nickname)
-                        .build()));
+                        .build())
+                );
 
-        JwtToken token = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername(), "google", accessToken);
-        return token.getAccessToken();
+        Token extractedToken = Token.builder()
+                .user(user)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        tokenRepository.findByUserId(user.getUserId())
+                .orElseGet(() -> tokenRepository.save(extractedToken));
+
+        JwtToken googleToken = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername(), "google", accessToken);
+        return googleToken.getAccessToken();
     }
 
     // 리디렉션된 code를 가지고 구글의 access_token을 추출하는 함수
-    private String getAccessToken(String code) {
+    private List<String> getAccessToken(String code) {
         String clientId = env.getProperty("oauth2.google.client-id");
         String clientSecret = env.getProperty("oauth2.google.client-secret");
         String redirectUri = env.getProperty("oauth2.google.redirect-uri");
@@ -99,10 +119,14 @@ public class UserService {
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity(tokenUri, entity, Map.class);
 
-        ResponseEntity<JsonNode> responseNode = restTemplate.exchange(tokenUri, HttpMethod.POST, entity, JsonNode.class);
-        JsonNode accessTokenNode = responseNode.getBody();
-        return accessTokenNode.get("access_token").asText();
+        // Access Token 및 Refresh Token 저장
+        Map<String, Object> responseBody = response.getBody();
+        String accessToken = (String) responseBody.get("access_token");
+        String refreshToken = (String) responseBody.get("refresh_token");
+
+        return Arrays.asList(accessToken, refreshToken);
     }
 
     // 구글 로그인을 통해 유저의 정보를 얻어오는 함수

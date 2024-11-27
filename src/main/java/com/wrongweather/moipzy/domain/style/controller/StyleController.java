@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("moipzy/style")
+@RequestMapping("/moipzy/style")
 @RequiredArgsConstructor
 @Slf4j
 public class StyleController {
