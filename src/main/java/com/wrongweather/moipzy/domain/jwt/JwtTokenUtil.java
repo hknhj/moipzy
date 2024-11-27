@@ -4,29 +4,24 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
-import java.util.Map;
 
 @Slf4j
 @Component
 public class JwtTokenUtil {
 
-    private final SecretKey secretKey;
-    private final long expireTime = 1000 * 60 * 60;
+    private final Key secretKey;
+    private final long expireTime = 1000 * 60 * 60; // 1시간
 
-    //해당 클래스 생성하면서 application.yml에 있는 jwt.secret 값을 넣어준다
+    // Secret Key를 Base64 디코딩하여 Key 객체로 초기화
     public JwtTokenUtil(@Value("${jwt.secret}") String secretKey) {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     //토큰 생성
@@ -68,18 +63,13 @@ public class JwtTokenUtil {
         }
     }
 
-//    public String extractUserId(String token) {
-//        // JWT 파싱 로직
-//        Claims claims = Jwts.parserBuilder()
-//                .setSigningKey(SECRET_KEY)
-//                .build()
-//                .parseClaimsJws(token)
-//                .getBody();
-//        return claims.get("userId", String.class);
-//    }
-
-//    public static boolean isExpired(String token, String secretKey) {
-//        Date expiredDate = extractClaims(token).getExpiration();
-//        return expiredDate.before(new Date());
-//    }
+    public Integer extractUserId(String token) {
+        // JWT 파싱 로직
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("userId", Integer.class);
+    }
 }

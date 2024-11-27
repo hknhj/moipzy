@@ -7,6 +7,7 @@ import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.style.CombinationRecommend;
 import com.wrongweather.moipzy.domain.style.Style;
 import com.wrongweather.moipzy.domain.style.StyleRepository;
+import com.wrongweather.moipzy.domain.style.dto.StyleResponseDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
@@ -78,5 +79,20 @@ public class StyleService {
             return null;
         }
         return clothRepository.findByClothId(clothId).orElse(null);
+    }
+
+    public StyleResponseDto getStyle(int userId, LocalDate date) {
+        Style style = styleRepository.findByUser_UserIdAndWearAt(userId, date).orElse(null);
+
+        if (style == null) return null;
+
+        return StyleResponseDto.builder()
+                .styleId(style.getStyleId())
+                .outer(style.getOuter())
+                .top(style.getTop())
+                .bottom(style.getBottom())
+                .highTemp(style.getHighTemp())
+                .lowTemp(style.getLowTemp())
+                .build();
     }
 }
