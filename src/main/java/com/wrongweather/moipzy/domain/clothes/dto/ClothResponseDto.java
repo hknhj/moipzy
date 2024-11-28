@@ -12,6 +12,7 @@ import lombok.Getter;
 @Getter
 public class ClothResponseDto {
     private int userId;
+    private int clothId;
     private LargeCategory largeCategory;
     private SmallCategory smallCategory;
     private Color color;
@@ -21,6 +22,7 @@ public class ClothResponseDto {
     @Builder
     public ClothResponseDto(User user, Cloth cloth) {
         this.userId = user.getUserId();
+        this.clothId = cloth.getClothId();
         this.largeCategory = cloth.getLargeCategory();
         this.smallCategory = cloth.getSmallCategory();
         this.color = cloth.getColor();
