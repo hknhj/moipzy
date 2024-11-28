@@ -1,9 +1,11 @@
 package com.wrongweather.moipzy.domain.style.controller;
 
 import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
+import com.wrongweather.moipzy.domain.style.dto.StyleFeedbackRequestDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleResponseDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
 import com.wrongweather.moipzy.domain.style.service.StyleService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,6 +47,17 @@ public class StyleController {
         int userId = jwtTokenUtil.extractUserId(token);
 
         return styleService.getStyle(userId, date);
+    }
+
+    // 피드백 controller
+    @PatchMapping("/feedback")
+    public ResponseEntity<String> feedbackStyle(@RequestBody StyleFeedbackRequestDto requestDto) {
+        try {
+            int styleId = styleService.updateTemperature(requestDto);
+            return ResponseEntity.ok("style feedback completed successfully. Id: " + styleId);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
 }

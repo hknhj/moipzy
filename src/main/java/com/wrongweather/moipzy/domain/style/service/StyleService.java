@@ -7,10 +7,13 @@ import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.style.CombinationRecommend;
 import com.wrongweather.moipzy.domain.style.Style;
 import com.wrongweather.moipzy.domain.style.StyleRepository;
+import com.wrongweather.moipzy.domain.style.dto.Feedback;
+import com.wrongweather.moipzy.domain.style.dto.StyleFeedbackRequestDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleResponseDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,5 +97,30 @@ public class StyleService {
                 .highTemp(style.getHighTemp())
                 .lowTemp(style.getLowTemp())
                 .build();
+    }
+
+    public int updateTemperature(StyleFeedbackRequestDto requestDto) {
+        Style style = styleRepository.findById(requestDto.getStyleId()).orElseThrow(() -> new EntityNotFoundException("Style not found"));
+
+        Feedback feedback = requestDto.getFeedback();
+
+        switch (feedback) {
+            case HOT:
+
+                break;
+
+            case GOOD:
+
+                break;
+
+            case COLD:
+
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unexpected feedback: " + feedback);
+        }
+
+        return style.getStyleId();
     }
 }
