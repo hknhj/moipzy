@@ -29,45 +29,7 @@ public class CalendarService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public Map<String, List<Map<String, String>>> getEventsByDate(String accessToken, String date) throws IOException {
-
-        // Map to store events for the requested date with time
-        Map<String, List<Map<String, String>>> eventMap = new HashMap<>();
-
-        //Formatter for the input date and UTC time conversion
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
-        //Parse the input date
-        LocalDate requestedDate = LocalDate.parse(date, inputFormatter);
-
-        // Generate start and end times in UTC
-        String startOfDay = requestedDate.atStartOfDay(ZoneOffset.UTC).format(utcFormatter);
-        String endOfDay = requestedDate.atTime(23, 59, 59).atOffset(ZoneOffset.UTC).format(utcFormatter);
-
-        // Get date's url in UTC format
-        String todayUrl = getUrl(startOfDay, endOfDay);
-
-        // Authorization 헤더에 Access Token 추가
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-
-        // request를 위한 HttpEntity
-        HttpEntity<String> request = new HttpEntity<>(headers);
-
-        // Google Calendar API에 오늘 event에 대한 GET 요청
-        ResponseEntity<String> response = restTemplate.exchange(todayUrl, HttpMethod.GET, request, String.class);
-
-        // 응답을 반환 (JSON 형식의 일정 데이터)
-        String responseBody =  response.getBody();
-        List<Map<String, String>> events = getEventsWithTime(responseBody);
-
-        eventMap.put(date, events);
-
-        return eventMap;
-    }
-
-    public Map<LocalDate, List<Map<String, String>>> getEventTest(int userId, LocalDate date) throws IOException {
+    public Map<LocalDate, List<Map<String, String>>> getEvents(int userId, LocalDate date) throws IOException {
 
         // Map to store events for the requested date with time
         Map<LocalDate, List<Map<String, String>>> eventMap = new HashMap<>();
@@ -83,7 +45,6 @@ public class CalendarService {
         String todayUrl = getUrl(startOfDay, endOfDay);
 
         String accessToken = tokenRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException()).getAccessToken();
-        System.out.println(accessToken);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -96,8 +57,6 @@ public class CalendarService {
         List<Map<String, String>> events = getEventsWithTime(responseBody);
 
         eventMap.put(date, events);
-
-        System.out.println(eventMap);
 
         return eventMap;
     }

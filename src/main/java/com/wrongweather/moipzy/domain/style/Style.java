@@ -1,6 +1,7 @@
 package com.wrongweather.moipzy.domain.style;
 
 import com.wrongweather.moipzy.domain.clothes.Cloth;
+import com.wrongweather.moipzy.domain.style.dto.Feedback;
 import com.wrongweather.moipzy.domain.users.User;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -42,8 +43,12 @@ public class Style {
     @Column(name = "lowTemp", nullable = false)
     private int lowTemp;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true) // 초기에는 피드백이 없을 수 있으므로 nullable 설정
+    private Feedback feedback;
+
     @Builder
-    public Style(User user, Cloth outer, Cloth top, Cloth bottom, int highTemp, int lowTemp) {
+    public Style(User user, Cloth outer, Cloth top, Cloth bottom, int highTemp, int lowTemp, Feedback feedback) {
         this.user = user;
         this.outer = outer;
         this.top = top;
@@ -51,5 +56,10 @@ public class Style {
         this.wearAt = LocalDate.now();
         this.highTemp = highTemp;
         this.lowTemp = lowTemp;
+        this.feedback = feedback;
+    }
+
+    public void updateFeedback(Feedback feedback) {
+        this.feedback = feedback;
     }
 }

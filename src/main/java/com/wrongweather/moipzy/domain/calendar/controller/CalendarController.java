@@ -17,13 +17,8 @@ public class CalendarController {
 
     private final CalendarService calendarService;
 
-    @GetMapping("/tomorrow-events")
-    public Map<String, List<Map<String, String>>> getUpcomingEvents(@RequestParam("access_token") String accessToken, @RequestParam("date") String date) throws IOException {
-        return calendarService.getEventsByDate(accessToken, date);
-    }
-
-    @GetMapping("calendarTest/{userId}")
+    @GetMapping("calendar/{userId}")
     public Map<LocalDate, List<Map<String, String>>> getEvents(@PathVariable int userId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws IOException {
-        return calendarService.getEventTest(userId, date);
+        return calendarService.getEvents(userId, date);
     }
 }
