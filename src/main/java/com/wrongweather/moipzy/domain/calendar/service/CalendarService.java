@@ -3,6 +3,7 @@ package com.wrongweather.moipzy.domain.calendar.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wrongweather.moipzy.domain.token.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +25,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CalendarService {
 
+    private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -61,6 +63,41 @@ public class CalendarService {
         List<Map<String, String>> events = getEventsWithTime(responseBody);
 
         eventMap.put(date, events);
+
+        return eventMap;
+    }
+
+    public Map<LocalDate, List<Map<String, String>>> getEventTest(int userId, LocalDate date) throws IOException {
+
+        // Map to store events for the requested date with time
+        Map<LocalDate, List<Map<String, String>>> eventMap = new HashMap<>();
+
+        // Formatter for UTC time conversion
+        DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+        // Generate start and end times in UTC
+        String startOfDay = date.atStartOfDay(ZoneOffset.UTC).format(utcFormatter);
+        String endOfDay = date.atTime(23, 59, 59).atOffset(ZoneOffset.UTC).format(utcFormatter);
+
+        // Get date's URL in UTC format
+        String todayUrl = getUrl(startOfDay, endOfDay);
+
+        String accessToken = tokenRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException()).getAccessToken();
+        System.out.println(accessToken);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(todayUrl, HttpMethod.GET, request, String.class);
+
+        String responseBody =  response.getBody();
+        List<Map<String, String>> events = getEventsWithTime(responseBody);
+
+        eventMap.put(date, events);
+
+        System.out.println(eventMap);
 
         return eventMap;
     }
