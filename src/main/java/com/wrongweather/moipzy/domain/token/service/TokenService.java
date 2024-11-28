@@ -1,8 +1,8 @@
 package com.wrongweather.moipzy.domain.token.service;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.wrongweather.moipzy.domain.token.Token;
 import com.wrongweather.moipzy.domain.token.TokenRepository;
+import com.wrongweather.moipzy.domain.token.dto.GoogleTokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -39,12 +39,12 @@ public class TokenService {
         for (Token token : tokens) {
             try {
                 // 갱신 요청
-                ResponseEntity<GoogleTokenResponse> response = requestNewAccessToken(token.getRefreshToken());
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                GoogleTokenResponse response = requestNewAccessToken(token.getRefreshToken());
+                if (response != null) {
                     // 토큰 갱신
-                    GoogleTokenResponse tokenResponse = response.getBody();
-                    token.updateAccessToken(tokenResponse.getAccessToken());
+                    token.updateAccessToken(response.getAccess_token());
                     tokenRepository.save(token);
+                    System.out.println("refresh completed");
                 }
             } catch (Exception e) {
                 // 갱신 실패 시 로그
@@ -54,7 +54,7 @@ public class TokenService {
         }
     }
 
-    private ResponseEntity<GoogleTokenResponse> requestNewAccessToken(String refreshToken) {
+    private GoogleTokenResponse requestNewAccessToken(String refreshToken) {
         // Google OAuth 토큰 요청 파라미터
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("client_id", clientId);
@@ -67,7 +67,8 @@ public class TokenService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
-        // Google 토큰 갱신 요청
-        return restTemplate.postForEntity(tokenUri, request, GoogleTokenResponse.class);
+        ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(tokenUri, request, GoogleTokenResponse.class);
+
+        return response.getBody();
     }
 }

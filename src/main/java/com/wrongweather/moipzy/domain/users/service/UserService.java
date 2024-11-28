@@ -88,14 +88,31 @@ public class UserService {
                         .build())
                 );
 
-        Token extractedToken = Token.builder()
-                .user(user)
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-
         tokenRepository.findByUserId(user.getUserId())
-                .orElseGet(() -> tokenRepository.save(extractedToken));
+                .ifPresentOrElse(
+                        existingToken -> {
+                            //이미 token 테이블에 존재하면 값 업데이트
+                            existingToken.updateToken(accessToken, refreshToken);
+                            tokenRepository.save(existingToken);
+                        },
+                        () -> {
+                            Token newToken = Token.builder()
+                                    .user(user)
+                                    .accessToken(accessToken)
+                                    .refreshToken(refreshToken)
+                                    .build();
+                            tokenRepository.save(newToken);
+                        }
+                );
+
+//        Token extractedToken = Token.builder()
+//                .user(user)
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .build();
+//
+//        tokenRepository.findByUserId(user.getUserId())
+//                .orElseGet(() -> tokenRepository.save(extractedToken));
 
         JwtToken googleToken = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername(), "google", accessToken);
         return googleToken.getAccessToken();
