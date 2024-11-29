@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -45,26 +47,42 @@ public class StyleService {
         Map<LocalDate, List<Map<String, String>>> eventList = new HashMap<>();
         try {
              eventList = calendarService.getEvents(userId, LocalDate.now());
-             prompt += "Event: ";
+             //prompt += "Event: ";
              // 각 날짜별 이벤트에서 summary만 추출
              for (Map.Entry<LocalDate, List<Map<String, String>>> entry : eventList.entrySet()) {
                  LocalDate date = entry.getKey();
                  List<Map<String, String>> events = entry.getValue();
 
                  // 각 이벤트에서 summary 추출
-                 StringBuilder summaries = new StringBuilder();
+                 StringBuilder eventDetails = new StringBuilder();
                  for (Map<String, String> event : events) {
                      String summary = event.get("summary");
-                     if (summary != null) {
-                         summaries.append(summary).append(", ");
+                     String startTime = event.get("startTime");
+                     String endTime = event.get("endTime");
+
+                     if (summary != null && startTime != null && endTime != null) {
+                         // startTime과 endTime에서 시각 추출
+                         DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+                         LocalDateTime startDateTime = LocalDateTime.parse(startTime, formatter);
+                         LocalDateTime endDateTime = LocalDateTime.parse(endTime, formatter);
+
+                         String startFormatted = startDateTime.getHour() + "시 " + startDateTime.getMinute() + "분";
+                         String endFormatted = endDateTime.getHour() + "시 " + endDateTime.getMinute() + "분";
+
+                         // 이벤트 상세 정보 추가
+                         eventDetails.append("Summary: ").append(summary)
+                                 .append(", Start: ").append(startFormatted)
+                                 .append(", End: ").append(endFormatted)
+                                 .append("; ");
                      }
                  }
 
                  //날짜와 summary 출력
-                 if (summaries.length() > 0) {
+                 if (eventDetails.length() > 0) {
                      // 마지막 쉼표 제거
-                     summaries.setLength(summaries.length() - 2);
-                     prompt += "Date: " + date + " - Summaries: " + summaries.toString() + "\n";
+                     eventDetails.setLength(eventDetails.length() - 2);
+                     eventSummary += "Date: " + date + " - " + eventDetails.toString() + "\n";
+                     prompt += "Event: " + eventSummary;
                  }
              }
         } catch (Exception e) {

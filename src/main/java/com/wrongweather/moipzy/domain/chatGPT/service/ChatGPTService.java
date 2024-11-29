@@ -137,7 +137,7 @@ public class ChatGPTService {
             - When recommending `D-SHIRT` as an outerwear item, the top must be either a `T-SHIRT` or `LONG_SLEEVE`.
             - If the `High temperature` falls between the `soloHighTemp` and `soloLowTemp` of the `D-SHIRT`, recommend `D-SHIRT` as a `top`.
             - If the `High temperature` is outside the range of the `soloHighTemp` and `soloLowTemp` for `D-SHIRT`, recommend it as an `outer` (with a valid top underneath, such as `T-SHIRT` or `LONG_SLEEVE`).          
-        
+            - D-SHIRT를 설명할 때에는 셔츠라고 설명해줘
         
         Follow these guidelines closely when making recommendations.
                         """),
