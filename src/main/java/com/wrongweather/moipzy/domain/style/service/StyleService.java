@@ -1,6 +1,7 @@
 package com.wrongweather.moipzy.domain.style.service;
 
 import com.wrongweather.moipzy.domain.calendar.service.CalendarService;
+import com.wrongweather.moipzy.domain.chatGPT.dto.OutfitResponse;
 import com.wrongweather.moipzy.domain.chatGPT.service.ChatGPTService;
 import com.wrongweather.moipzy.domain.clothes.Cloth;
 import com.wrongweather.moipzy.domain.clothes.ClothRepository;
@@ -19,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,14 +35,38 @@ public class StyleService {
     private final int INF_HIGH_TEMPERATURE = 70;
     private final int INF_LOW_TEMPERATURE = -70;
 
-    public String recommend(int userId, int highTemp, int lowTemp) {
-        String prompt = "";
+    public OutfitResponse recommend(int userId, int highTemp, int lowTemp) {
+        String prompt = "High temperature: "+ highTemp
+                     + ", Low temperature: "+ lowTemp + "\n";
+
+        String eventSummary = null;
 
         //해당 유저의 구글 캘린더에서 일정을 가져오고, 일정이 있으면 prompt에 추가한다.
         Map<LocalDate, List<Map<String, String>>> eventList = new HashMap<>();
         try {
              eventList = calendarService.getEvents(userId, LocalDate.now());
-             prompt += eventList + "\n";
+             prompt += "Event: ";
+             // 각 날짜별 이벤트에서 summary만 추출
+             for (Map.Entry<LocalDate, List<Map<String, String>>> entry : eventList.entrySet()) {
+                 LocalDate date = entry.getKey();
+                 List<Map<String, String>> events = entry.getValue();
+
+                 // 각 이벤트에서 summary 추출
+                 StringBuilder summaries = new StringBuilder();
+                 for (Map<String, String> event : events) {
+                     String summary = event.get("summary");
+                     if (summary != null) {
+                         summaries.append(summary).append(", ");
+                     }
+                 }
+
+                 //날짜와 summary 출력
+                 if (summaries.length() > 0) {
+                     // 마지막 쉼표 제거
+                     summaries.setLength(summaries.length() - 2);
+                     prompt += "Date: " + date + " - Summaries: " + summaries.toString() + "\n";
+                 }
+             }
         } catch (Exception e) {
             e.printStackTrace();
         }

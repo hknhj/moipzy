@@ -70,14 +70,22 @@ public class Cloth {
 
     @Override
     public String toString() {
-        return "Cloth{" +
+        String str = "Cloth {" +
                 "clothId=" + clothId +
                 ", largeCategory=" + largeCategory +
                 ", smallCategory=" + smallCategory +
                 ", color=" + color +
                 ", degree=" + degree +
-                ", wearAt=" + (wearAt != null ? wearAt.toString() : "null") +
-                '}';
+                ", wearAt=" + (wearAt != null ? wearAt.toString() : "null");
+
+        if (this.largeCategory == LargeCategory.TOP) {
+            str += ", soloHighTemperature=" + soloHighTemperature +
+                    ", soloLowTemperature=" + soloLowTemperature;
+        }
+
+        str += '}';
+
+        return str;
     }
 
     @Builder

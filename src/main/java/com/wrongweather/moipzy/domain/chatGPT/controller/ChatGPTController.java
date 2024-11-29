@@ -1,5 +1,6 @@
 package com.wrongweather.moipzy.domain.chatGPT.controller;
 
+import com.wrongweather.moipzy.domain.chatGPT.dto.OutfitResponse;
 import com.wrongweather.moipzy.domain.chatGPT.service.ChatGPTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +16,7 @@ public class ChatGPTController {
     private final ChatGPTService chatGPTService;
 
     @PostMapping
-    public String chat(@RequestBody String prompt) {
+    public OutfitResponse chat(@RequestBody String prompt) {
         return chatGPTService.getChatGPTResponse(prompt);
     }
 }
