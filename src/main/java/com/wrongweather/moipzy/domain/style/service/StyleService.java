@@ -43,7 +43,7 @@ public class StyleService {
         //해당 유저의 구글 캘린더에서 일정을 가져오고, 일정이 있으면 prompt에 추가한다.
         Map<LocalDate, List<Map<String, String>>> eventList = new HashMap<>();
         try {
-             eventList = calendarService.getEvents(userId, LocalDate.now());
+             //eventList = calendarService.getEvents(userId, LocalDate.now());
 
              prompt += "Event: ";
 
@@ -124,9 +124,51 @@ public class StyleService {
                     .build());
         }
         return recommends;
+    }
 
-//        //chatGPT에게 prompt를 보내고, 프롬프팅을 통해 결과를 반환함
-//        return chatGPTService.getChatGPTResponse(prompt);
+    public List<StyleRecommendResponseDto> recommendTest(int userId, int highTemp, int lowTemp, String events) {
+        String prompt = "High temperature: "+ highTemp
+                + ", Low temperature: "+ lowTemp + "\n";
+
+        prompt += events;
+
+        // 최고기온, 최저기온에 따라 아우터, 상의, 하의 리스트 추출
+        List<Cloth> outer = clothRepository.findByLargeCategoryAndTemperatureInRangeAndUserId(LargeCategory.OUTER, lowTemp, userId); //조회 결과가 없으면 빈 리스트를 반환한다. null 아님.
+        List<Cloth> top = clothRepository.findByLargeCategoryAndTemperatureInRangeAndUserId(LargeCategory.TOP, highTemp, userId);
+        List<Cloth> bottom = clothRepository.findByLargeCategoryAndTemperatureInRangeAndUserId(LargeCategory.BOTTOM, (highTemp+lowTemp)/2, userId);
+        List<List<Cloth>> clothList = Arrays.asList(outer, top, bottom);
+
+        // 모든 옷을 toString 메서드를 사용해 옷의 정보를 prompt에 넣는다.
+        for (List<Cloth> clothes : clothList) {
+            for (Cloth cloth : clothes) {
+                prompt += cloth.toString() + ' ';
+            }
+        }
+
+        OutfitResponse outfitResponse = chatGPTService.getChatGPTResponse(prompt);
+
+        List<OutfitResponse.Response> outfits = outfitResponse.getOutfits();
+
+        List<StyleRecommendResponseDto> recommends = new ArrayList<>();
+
+        for (OutfitResponse.Response outfit : outfits) {
+            Cloth recommendedOuter = clothRepository.findByClothId(outfit.getCombination().getOuter()).orElse(null);
+            Cloth recommendedTop = clothRepository.findByClothId(outfit.getCombination().getTop()).orElse(null);
+            Cloth recommendedBottom = clothRepository.findByClothId(outfit.getCombination().getBottom()).orElse(null);
+            String explanation = outfit.getExplanation();
+            String style = outfit.getStyle();
+
+            recommends.add(StyleRecommendResponseDto.builder()
+                    .outer(recommendedOuter)
+                    .top(recommendedTop)
+                    .bottom(recommendedBottom)
+                    .highTemp(highTemp)
+                    .lowTemp(lowTemp)
+                    .explanation(explanation)
+                    .style(style)
+                    .build());
+        }
+        return recommends;
     }
 
     @Transactional

@@ -1,15 +1,16 @@
 package com.wrongweather.moipzy.domain.kakao.service;
 
+import com.wrongweather.moipzy.domain.calendar.service.CalendarService;
 import com.wrongweather.moipzy.domain.clothes.category.Color;
 import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
 import com.wrongweather.moipzy.domain.style.service.StyleService;
 import com.wrongweather.moipzy.domain.weather.WeatherService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,21 +18,27 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class KaKaoService {
 
     private final StyleService styleService;
     private final WeatherService weatherService;
+    private final CalendarService calendarService;
 
     public Map<String, Object> getStyleRecommends(String utterance) {
-        int userId = 2;
+        int userId = 8;
 
+        long beforeTime = System.currentTimeMillis();
         //utterance로 today, tomorrow 입력받음
-        String date = convertDate(utterance);
+        LocalDate localDate = getLocalDate(utterance);
 
-        //최저기온, 최고기온 순서
-        List<Integer> temperatures = weatherService.getWeatherInfo(date);
+        //최저기온, 최고기온 순서, 하루에 한 번만 실행하고 꺼내쓰면 됨
 
-        List<StyleRecommendResponseDto> recommends = styleService.recommend(userId, temperatures.get(1), temperatures.get(0));
+        // 유저의 일정을 가져옴
+        String events = calendarService.getEvents(userId, localDate);
+
+        //기온과 일정을 토대로 옷차림을 추천함
+        List<StyleRecommendResponseDto> recommends = styleService.recommendTest(userId, 10, 5, events);
 
         // JSON 응답 구조 생성
         Map<String, Object> response = new HashMap<>();
@@ -99,23 +106,22 @@ public class KaKaoService {
         template.put("outputs", outputs);
         response.put("template", template);
 
+        long afterTime = System.currentTimeMillis();
+
+        long secDiffTime = (afterTime - beforeTime);
+
+        log.info("secDiffTime: {}", secDiffTime);
+
         return response;
     }
 
-    public String convertDate(String date) {
-        LocalDate today = LocalDate.now();
-        LocalDate resultDate;
-
+    public LocalDate getLocalDate(String date) {
         if ("today".equalsIgnoreCase(date)) {
-            resultDate = today;
+            return LocalDate.now();
         } else if ("tomorrow".equalsIgnoreCase(date)) {
-            resultDate = today.plusDays(1);
+            return LocalDate.now().plusDays(1);
         } else {
-            throw new IllegalArgumentException("오늘 또는 내일을 입력해주세요");
+            throw new IllegalArgumentException("Invalid date input. Use 'today' or 'tomorrow'.");
         }
-
-        //날짜를 "yyyyddyy" 형식으로 변환
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        return resultDate.format(formatter);
     }
 }

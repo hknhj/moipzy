@@ -17,8 +17,8 @@ public class CalendarController {
 
     private final CalendarService calendarService;
 
-    @GetMapping("calendar/{userId}")
-    public Map<LocalDate, List<Map<String, String>>> getEvents(@PathVariable int userId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws IOException {
+    @GetMapping("/calendar/{userId}")
+    public String getEvents(@PathVariable int userId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) throws IOException {
         return calendarService.getEvents(userId, date);
     }
 }
