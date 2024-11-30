@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("moipzy/style")
@@ -27,7 +28,7 @@ public class StyleController {
 
     // 옷 추천 controller
     @GetMapping("/recommend")
-    public OutfitResponse recommendByHighLow(@RequestParam int userId, @RequestParam int highTemp, @RequestParam int lowTemp) {
+    public List<StyleRecommendResponseDto> recommendByHighLow(@RequestParam int userId, @RequestParam int highTemp, @RequestParam int lowTemp) {
         return styleService.recommend(userId, highTemp, lowTemp);
     }
 

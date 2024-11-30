@@ -8,10 +8,7 @@ import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 import com.wrongweather.moipzy.domain.style.Style;
 import com.wrongweather.moipzy.domain.style.StyleRepository;
-import com.wrongweather.moipzy.domain.style.dto.Feedback;
-import com.wrongweather.moipzy.domain.style.dto.StyleFeedbackRequestDto;
-import com.wrongweather.moipzy.domain.style.dto.StyleResponseDto;
-import com.wrongweather.moipzy.domain.style.dto.StyleUploadRequestDto;
+import com.wrongweather.moipzy.domain.style.dto.*;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -37,7 +34,7 @@ public class StyleService {
     private final int INF_HIGH_TEMPERATURE = 70;
     private final int INF_LOW_TEMPERATURE = -70;
 
-    public OutfitResponse recommend(int userId, int highTemp, int lowTemp) {
+    public List<StyleRecommendResponseDto> recommend(int userId, int highTemp, int lowTemp) {
         String prompt = "High temperature: "+ highTemp
                      + ", Low temperature: "+ lowTemp + "\n";
 
@@ -102,8 +99,33 @@ public class StyleService {
             }
         }
 
-        //chatGPT에게 prompt를 보내고, 프롬프팅을 통해 결과를 반환함
-        return chatGPTService.getChatGPTResponse(prompt);
+        OutfitResponse outfitResponse = chatGPTService.getChatGPTResponse(prompt);
+
+        List<OutfitResponse.Response> outfits = outfitResponse.getOutfits();
+
+        List<StyleRecommendResponseDto> recommends = new ArrayList<>();
+
+        for (OutfitResponse.Response outfit : outfits) {
+            Cloth recommendedOuter = clothRepository.findByClothId(outfit.getCombination().getOuter()).orElse(null);
+            Cloth recommendedTop = clothRepository.findByClothId(outfit.getCombination().getTop()).orElse(null);
+            Cloth recommendedBottom = clothRepository.findByClothId(outfit.getCombination().getBottom()).orElse(null);
+            String explanation = outfit.getExplanation();
+            String style = outfit.getStyle();
+
+            recommends.add(StyleRecommendResponseDto.builder()
+                    .outer(recommendedOuter)
+                    .top(recommendedTop)
+                    .bottom(recommendedBottom)
+                    .highTemp(highTemp)
+                    .lowTemp(lowTemp)
+                    .explanation(explanation)
+                    .style(style)
+                    .build());
+        }
+        return recommends;
+
+//        //chatGPT에게 prompt를 보내고, 프롬프팅을 통해 결과를 반환함
+//        return chatGPTService.getChatGPTResponse(prompt);
     }
 
     @Transactional
@@ -149,6 +171,10 @@ public class StyleService {
 
     public StyleResponseDto getStyle(int userId, LocalDate date) {
         Style style = styleRepository.findByUser_UserIdAndWearAt(userId, date).orElse(null);
+
+        if (style.getUser().getUserId() != userId) {
+            return null;
+        }
 
         if (style == null) return null;
 

@@ -48,6 +48,14 @@ public class KakakoController {
         String top = "https://moipzy.shop/uploads/clothes/cbc88a6b5a704d37b6b60c2e67153c6e_니트1.webp";
         String bottom = "https://moipzy.shop/uploads/clothes/5b4a6f6cbe5e4a7e9b684141de6216ac_슬랙스1.webp";
 
+        try{
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonInString = mapper.writeValueAsString(requestBody);
+            System.out.println(jsonInString);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         // JSON 응답 구조 생성
         Map<String, Object> response = new HashMap<>();
         response.put("version", "2.0");
@@ -65,22 +73,26 @@ public class KakakoController {
 
         // 상의 아이템
         Map<String, Object> topItem = new HashMap<>();
-        topItem.put("title", "상의 추천");
-        topItem.put("description", "내일 날씨에 적합한 상의입니다.");
-        topItem.put("imageUrl", top); // 상의 이미지 URL만 추가
-//        topItem.put("buttons", List.of(
-//                Map.of("action", "webLink", "label", "자세히 보기", "webLinkUrl", "https://your-service.com")
-//        ));
+        topItem.put("title", "top");
+
+        // 상의 썸네일 설정 (imageUrl, fixedRatio)
+        Map<String, Object> topThumbnail = new HashMap<>();
+        topThumbnail.put("imageUrl", top);
+        topThumbnail.put("fixedRatio", true);  // 비율 고정
+        topItem.put("thumbnail", topThumbnail);
+
         items.add(topItem);
 
         // 하의 아이템
         Map<String, Object> bottomItem = new HashMap<>();
-        bottomItem.put("title", "하의 추천");
-        bottomItem.put("description", "내일 날씨에 적합한 하의입니다.");
-        bottomItem.put("imageUrl", bottom); // 하의 이미지 URL만 추가
-//        bottomItem.put("buttons", List.of(
-//                Map.of("action", "webLink", "label", "자세히 보기", "webLinkUrl", "https://your-service.com")
-//        ));
+        bottomItem.put("title", "bottom");
+
+        // 하의 썸네일 설정 (imageUrl, fixedRatio)
+        Map<String, Object> bottomThumbnail = new HashMap<>();
+        bottomThumbnail.put("imageUrl", bottom);
+        bottomThumbnail.put("fixedRatio", true);  // 비율 고정
+        bottomItem.put("thumbnail", bottomThumbnail);
+
         items.add(bottomItem);
 
         // 카로셀 항목에 아이템들 추가
