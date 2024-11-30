@@ -27,7 +27,7 @@ public class WeatherService {
     String weatherServiceKey;
 
     //최저기온, 최고기온 순으로 return
-    public List<Integer> getWeatherInfo(String date) throws Exception {
+    public List<Integer> getWeatherInfo(String date) {
         //String resultDate = convertDate(date);
         String resultDate = convertDate("today");
 

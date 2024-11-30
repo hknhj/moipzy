@@ -1,6 +1,9 @@
 package com.wrongweather.moipzy.domain.kakao.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wrongweather.moipzy.domain.kakao.service.KaKaoService;
+import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -9,7 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 public class KakakoController {
+
+    private final KaKaoService kaKaoService;
 
     //카카오톡 오픈빌더로 리턴할 스킬 API
     @PostMapping(value = "/kakaoTest", headers = "Accept=application/json")
@@ -102,5 +108,12 @@ public class KakakoController {
         response.put("template", template);
 
         return response;
+    }
+
+    @PostMapping("/recommendTest")
+    public Map<String, Object> recommendTest(@RequestBody Map<String, Object> requestBody) {
+        JSONObject jsonObject = new JSONObject(requestBody);
+        String utterance = jsonObject.getJSONObject("userRequest").getString("utterance");
+        return kaKaoService.getStyleRecommends(utterance);
     }
 }
