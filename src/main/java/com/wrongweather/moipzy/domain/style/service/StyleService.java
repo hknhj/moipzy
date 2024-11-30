@@ -44,7 +44,9 @@ public class StyleService {
         Map<LocalDate, List<Map<String, String>>> eventList = new HashMap<>();
         try {
              eventList = calendarService.getEvents(userId, LocalDate.now());
-             //prompt += "Event: ";
+
+             prompt += "Event: ";
+
              // 각 날짜별 이벤트에서 summary만 추출
              for (Map.Entry<LocalDate, List<Map<String, String>>> entry : eventList.entrySet()) {
                  LocalDate date = entry.getKey();
@@ -79,7 +81,6 @@ public class StyleService {
                      // 마지막 쉼표 제거
                      eventDetails.setLength(eventDetails.length() - 2);
                      eventSummary += "Date: " + date + " - " + eventDetails.toString() + "\n";
-                     prompt += "Event: " + eventSummary;
                  }
              }
         } catch (Exception e) {
