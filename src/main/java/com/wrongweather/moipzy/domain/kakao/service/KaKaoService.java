@@ -25,11 +25,8 @@ import java.util.Map;
 public class KaKaoService {
 
     private final StyleService styleService;
-    private final WeatherService weatherService;
     private final CalendarService calendarService;
-
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public Map<String, Object> getStyleRecommends(String utterance) {
         int userId = 8;
@@ -123,15 +120,15 @@ public class KaKaoService {
 
     public Map<String, Object> getStyleRecommendsTest(String utterance) {
         int userId = 8;
-        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 
         long beforeTime = System.currentTimeMillis();
         //utterance로 today, tomorrow 입력받음
         LocalDate localDate = getLocalDate(utterance);
 
         //최저기온, 최고기온 순서, 하루에 한 번만 실행하고 꺼내쓰면 됨
-        int minTemp = (int)valueOperations.get("todayMinTemp");
-        int maxTemp = (int)valueOperations.get("todayMaxTemp");
+        int minTemp = Integer.parseInt(valueOperations.get("todayMinTemp"));
+        int maxTemp = Integer.parseInt(valueOperations.get("todayMaxTemp"));
 
         log.info("minTemp: {}", minTemp);
         log.info("maxTemp: {}", maxTemp);

@@ -31,9 +31,7 @@ import java.util.List;
 @Slf4j
 public class WeatherService {
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-
+    private final RedisTemplate<String, String> redisTemplate;
     private final RestTemplate restTemplate;
 
     @Value("${weather.key}")
@@ -83,11 +81,11 @@ public class WeatherService {
             log.info("Tomorrow max temp: " + tempList.get(3));
             // Extracting minTemp and maxTemp
 
-            ValueOperations<String, Object> vop = redisTemplate.opsForValue();
-            vop.set("todayMinTemp", tempList.get(0));
-            vop.set("todayMaxTemp", tempList.get(1));
-            vop.set("tomorrowMinTemp", tempList.get(2));
-            vop.set("tomorrowMaxTemp", tempList.get(3));
+            ValueOperations<String, String> vop = redisTemplate.opsForValue();
+            vop.set("todayMinTemp", tempList.get(0).toString());
+            vop.set("todayMaxTemp", tempList.get(1).toString());
+            vop.set("tomorrowMinTemp", tempList.get(2).toString());
+            vop.set("tomorrowMaxTemp", tempList.get(3).toString());
 
         }catch (Exception e){
             e.printStackTrace();

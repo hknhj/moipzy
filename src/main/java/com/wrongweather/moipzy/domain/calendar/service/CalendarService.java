@@ -38,9 +38,7 @@ public class CalendarService {
     private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper mapper = new ObjectMapper();
-
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @PostConstruct
     public void getAllEvents() {
