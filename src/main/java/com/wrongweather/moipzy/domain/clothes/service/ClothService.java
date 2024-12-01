@@ -9,6 +9,7 @@ import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
+import com.wrongweather.moipzy.domain.clothes.dto.ClothUpdateRequestDto;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -136,6 +137,29 @@ public class ClothService {
         }
 
         return clothResponseDtoList;
+    }
+
+    @Transactional
+    public int updateCloth(int clothId, ClothUpdateRequestDto clothUpdateRequestDto) {
+        Cloth cloth = clothRepository.findByClothId(clothId).orElseThrow(() -> new IllegalArgumentException("Cloth not found with ID: " + clothId));
+
+        // entity가 변경되면 save() 하지 않아도 자동으로 db 반영 -> dirty checking
+        cloth.updateCloth(
+                clothUpdateRequestDto.getLargeCategory(),
+                clothUpdateRequestDto.getSmallCategory(),
+                clothUpdateRequestDto.getColor(),
+                clothUpdateRequestDto.getDegree()
+        );
+
+        return cloth.getClothId();
+    }
+
+    @Transactional
+    public int deleteCloth(int clothId) {
+        Cloth cloth = clothRepository.findByClothId(clothId).orElseThrow(() -> new IllegalArgumentException("Cloth not found with ID: " + clothId));
+        clothRepository.delete(cloth);
+
+        return cloth.getClothId();
     }
 
     // 옷 큰분류 기준으로 옷 온도 범위 설정

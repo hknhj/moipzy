@@ -68,6 +68,13 @@ public class Cloth {
     @Setter
     private int soloLowTemperature;
 
+    public void updateCloth(LargeCategory largeCategory, SmallCategory smallCategory, Color color, Degree degree) {
+        this.largeCategory = largeCategory;
+        this.smallCategory = smallCategory;
+        this.color = color;
+        this.degree = degree;
+    }
+
     @Override
     public String toString() {
         String str = "Cloth {" +
