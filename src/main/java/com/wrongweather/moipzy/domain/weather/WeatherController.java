@@ -15,8 +15,8 @@ public class WeatherController {
     private final WeatherService weatherService;
 
     @GetMapping("/weather")
-    public List<Integer> getWeather(@RequestParam String date) throws Exception {
-        return weatherService.getWeatherInfo(date);
+    public void getWeather(@RequestParam String date) throws Exception {
+        weatherService.getWeather();
     }
 }
 
