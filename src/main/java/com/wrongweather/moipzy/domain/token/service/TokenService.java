@@ -4,6 +4,7 @@ import com.wrongweather.moipzy.domain.token.Token;
 import com.wrongweather.moipzy.domain.token.TokenRepository;
 import com.wrongweather.moipzy.domain.token.dto.GoogleTokenResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TokenService {
     private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate;
@@ -44,7 +46,7 @@ public class TokenService {
                     // 토큰 갱신
                     token.updateAccessToken(response.getAccess_token());
                     tokenRepository.save(token);
-                    System.out.println("refresh completed");
+                    log.info("refresh completed");
                 }
             } catch (Exception e) {
                 // 갱신 실패 시 로그

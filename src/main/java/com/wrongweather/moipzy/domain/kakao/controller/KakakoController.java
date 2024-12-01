@@ -114,6 +114,6 @@ public class KakakoController {
     public Map<String, Object> recommendTest(@RequestBody Map<String, Object> requestBody) {
         JSONObject jsonObject = new JSONObject(requestBody);
         String utterance = jsonObject.getJSONObject("userRequest").getString("utterance");
-        return kaKaoService.getStyleRecommends(utterance);
+        return kaKaoService.getStyleRecommendsTest(utterance);
     }
 }

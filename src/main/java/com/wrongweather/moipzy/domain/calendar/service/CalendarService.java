@@ -3,14 +3,19 @@ package com.wrongweather.moipzy.domain.calendar.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wrongweather.moipzy.domain.token.Token;
 import com.wrongweather.moipzy.domain.token.TokenRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,6 +38,35 @@ public class CalendarService {
     private final TokenRepository tokenRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @PostConstruct
+    public void getAllEvents() {
+        List<Token> tokens = tokenRepository.findAll();
+        for (Token token : tokens) {
+            int userId = token.getUserId();
+
+            LocalDate today= LocalDate.now();
+            LocalDate tomorrow = today.plusDays(1);
+
+            String todayEvents = getEvents(userId, today);
+            String tomorrowEvents = getEvents(userId, tomorrow);
+
+            redisTemplate.opsForHash().put(Integer.toString(userId), "today", todayEvents);
+            redisTemplate.opsForHash().put(Integer.toString(userId), "tomorrow", tomorrowEvents);
+
+            log.info("events: {}", redisTemplate.opsForHash().entries(Integer.toString(userId)));
+        }
+    }
+
+    // 매일 05:00 실행
+    @Scheduled(cron = "0 0 5 * * *")
+    public void updateDailyEvents() {
+        log.info("Updating daily events information...");
+        getAllEvents();
+    }
 
     public String getEvents(int userId, LocalDate date) {
 
