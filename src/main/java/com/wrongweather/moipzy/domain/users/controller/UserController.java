@@ -36,18 +36,17 @@ public class UserController {
 
     // 일반 회원가입 진행
     @PostMapping("/register")
-    public UserIdResponseDto register(@Validated @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
-        return userService.register(userRegisterRequestDto);
+    public String register(@Validated @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
+        userService.register(userRegisterRequestDto);
+        return "redirect:/home";  // 홈 화면으로 리디렉션
     }
 
     // 일반 로그인 진행
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
+    public String login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
         String accessToken = userService.login(userLoginRequestDto);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + accessToken);
-        return new ResponseEntity<>(headers, HttpStatus.OK);
+        return "redirect:/home?token=" + accessToken;  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
@@ -72,8 +71,6 @@ public class UserController {
     public String googleLogin(@RequestParam String code) {
         String jwtToken = userService.socialLogin(code);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + jwtToken);
-        return jwtToken;
+        return "redirect:/home?token=" + jwtToken;
     }
 }
