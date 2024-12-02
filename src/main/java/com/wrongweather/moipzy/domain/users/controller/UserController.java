@@ -68,9 +68,9 @@ public class UserController {
 
     //구글 로그인 진행 후 code 를 포함하여 redirection 되는 url
     @GetMapping("/login/google")
-    public String googleLogin(@RequestParam String code) {
+    public ResponseEntity<?> googleLogin(@RequestParam String code) {
         String jwtToken = userService.socialLogin(code);
 
-        return "redirect:/home?token=" + jwtToken;
+        return ResponseEntity.ok(jwtToken); // JWT 반환
     }
 }
