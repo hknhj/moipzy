@@ -40,7 +40,7 @@ public class CalendarService {
     private final ObjectMapper mapper = new ObjectMapper();
     private final RedisTemplate<String, String> redisTemplate;
 
-    @PostConstruct
+    //캘린더 업데이트 메서드
     public void getAllEvents() {
         List<Token> tokens = tokenRepository.findAll();
         for (Token token : tokens) {
@@ -67,8 +67,6 @@ public class CalendarService {
     }
 
     public String getEvents(int userId, LocalDate date) {
-
-        long start = System.currentTimeMillis();
 
         try {
             // Map to store events for the requested date with time
@@ -138,10 +136,6 @@ public class CalendarService {
                     result += "Date: " + date + " - " + eventDetails.toString() + "\n";
                 }
             }
-
-            long end = System.currentTimeMillis();
-
-            log.info("event time: {} ms", end - start);
 
             return result;
 

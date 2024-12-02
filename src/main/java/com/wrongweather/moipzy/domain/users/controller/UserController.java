@@ -1,9 +1,6 @@
 package com.wrongweather.moipzy.domain.users.controller;
 
-import com.wrongweather.moipzy.domain.jwt.JwtToken;
 import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
-import com.wrongweather.moipzy.domain.users.User;
-import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
 import com.wrongweather.moipzy.domain.users.service.UserService;
@@ -11,13 +8,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/moipzy/users", produces = "application/json")
@@ -44,9 +39,9 @@ public class UserController {
     // 일반 로그인 진행
     @PostMapping("/login")
     public String login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
-        String accessToken = userService.login(userLoginRequestDto);
+        List<String> accessTokenAndName = userService.login(userLoginRequestDto);
 
-        return "redirect:/loginmypage?token=" + accessToken;  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
+        return "redirect:/loginmypage?token=" + accessTokenAndName.get(0) + "&username=" + accessTokenAndName.get(1);  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
@@ -59,8 +54,7 @@ public class UserController {
                 + "&access_type=offline"
                 + "&response_type=code"
                 + "&scope=https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly"
-                + "&prompt=consent"; //얘 하나때문에 몇시간을 씨발아
-
+                + "&prompt=consent";
 
         // Google OAuth2 페이지로 리다이렉트
         response.sendRedirect(googleAuthUrl);
@@ -69,8 +63,8 @@ public class UserController {
     //구글 로그인 진행 후 code 를 포함하여 redirection 되는 url
     @GetMapping("/login/google")
     public String googleLogin(@RequestParam String code) {
-        String jwtToken = userService.socialLogin(code);
+        List<String> jwtTokenAndName = userService.socialLogin(code);
 
-        return "redirect:/loginmypage?token=" + jwtToken;
+        return "redirect:/loginmypage?token=" + jwtTokenAndName.get(0) + "&username=" + jwtTokenAndName.get(1);
     }
 }

@@ -10,8 +10,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -34,7 +34,6 @@ public class TokenService {
     @Value("${oauth2.google.token-uri}")
     private String tokenUri;
 
-    @Transactional
     public void refreshTokens() {
         List<Token> tokens = tokenRepository.findAll(); // DB에서 모든 토큰 조회
 
@@ -72,5 +71,11 @@ public class TokenService {
         ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(tokenUri, request, GoogleTokenResponse.class);
 
         return response.getBody();
+    }
+
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행 (밀리초 단위)
+    public void refreshTokensPeriodically() {
+        log.info("Refresh tokens periodically");
+        refreshTokens();
     }
 }

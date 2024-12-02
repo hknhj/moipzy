@@ -51,7 +51,7 @@ public class UserService {
     }
 
     // 로그인 후 jwt token 발행 서비스
-    public String login(UserLoginRequestDto userLoginRequestDto) {
+    public List<String> login(UserLoginRequestDto userLoginRequestDto) {
         String requestEmail = userLoginRequestDto.getEmail();
         String requestPassword = userLoginRequestDto.getPassword();
 
@@ -62,12 +62,12 @@ public class UserService {
         }
 
         JwtToken token = jwtTokenUtil.createToken(foundUser.getUserId(), foundUser.getEmail(), foundUser.getUsername(), "regular", null);
-        return token.getAccessToken();
+        return Arrays.asList(token.getAccessToken(), foundUser.getUsername());
     }
 
     // 구글 로그인 서비스
     @Transactional
-    public String socialLogin(String code) {
+    public List<String> socialLogin(String code) {
         List<String> tokens = getAccessToken(code);
         String accessToken = tokens.get(0);
         String refreshToken = tokens.get(1);
@@ -105,17 +105,8 @@ public class UserService {
                         }
                 );
 
-//        Token extractedToken = Token.builder()
-//                .user(user)
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .build();
-//
-//        tokenRepository.findByUserId(user.getUserId())
-//                .orElseGet(() -> tokenRepository.save(extractedToken));
-
         JwtToken googleToken = jwtTokenUtil.createToken(user.getUserId(), user.getEmail(), user.getUsername(), "google", accessToken);
-        return googleToken.getAccessToken();
+        return Arrays.asList(googleToken.getAccessToken(), user.getUsername());
     }
 
     // 리디렉션된 code를 가지고 구글의 access_token을 추출하는 함수
