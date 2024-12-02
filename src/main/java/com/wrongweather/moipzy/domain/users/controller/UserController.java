@@ -46,7 +46,7 @@ public class UserController {
     public String login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
         String accessToken = userService.login(userLoginRequestDto);
 
-        return "redirect:/Loginmypage?token=" + accessToken;  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
+        return "redirect:/loginmypage?token=" + accessToken;  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
@@ -71,6 +71,6 @@ public class UserController {
     public String googleLogin(@RequestParam String code) {
         String jwtToken = userService.socialLogin(code);
 
-        return "redirect:/Loginmypage?token=" + jwtToken;
+        return "redirect:/loginmypage?token=" + jwtToken;
     }
 }
