@@ -38,10 +38,11 @@ public class UserController {
 
     // 일반 로그인 진행
     @PostMapping("/login")
-    public String login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
+    public void login(@RequestBody UserLoginRequestDto userLoginRequestDto, HttpServletResponse response) throws IOException {
         List<String> accessTokenAndName = userService.login(userLoginRequestDto);
 
-        return "redirect:/loginmypage?token=" + accessTokenAndName.get(0) + "&username=" + accessTokenAndName.get(1);  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
+        String redirectUrl = "/loginmypage?token=" + accessTokenAndName.get(0) + "&username=" + accessTokenAndName.get(1);
+        response.sendRedirect(redirectUrl);
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
@@ -62,9 +63,10 @@ public class UserController {
 
     //구글 로그인 진행 후 code 를 포함하여 redirection 되는 url
     @GetMapping("/login/google")
-    public String googleLogin(@RequestParam String code) {
+    public void googleLogin(@RequestParam String code, HttpServletResponse response) throws IOException {
         List<String> jwtTokenAndName = userService.socialLogin(code);
 
-        return "redirect:/loginmypage?token=" + jwtTokenAndName.get(0) + "&username=" + jwtTokenAndName.get(1);
+        String redirectUrl = "/loginmypage?token=" + jwtTokenAndName.get(0) + "&username=" + jwtTokenAndName.get(1);
+        response.sendRedirect(redirectUrl);
     }
 }
