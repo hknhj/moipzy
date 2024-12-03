@@ -38,11 +38,10 @@ public class UserController {
 
     // 일반 로그인 진행
     @PostMapping("/login")
-    public void login(@RequestBody UserLoginRequestDto userLoginRequestDto, HttpServletResponse response) throws IOException {
+    public String login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
         List<String> accessTokenAndName = userService.login(userLoginRequestDto);
 
-        String redirectUrl = "/loginmypage?token=" + accessTokenAndName.get(0) + "&username=" + accessTokenAndName.get(1);
-        response.sendRedirect(redirectUrl);
+        return "redirect:/loginmypage?token=" + accessTokenAndName.get(0) + "&username=" + accessTokenAndName.get(1);  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
