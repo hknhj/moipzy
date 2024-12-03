@@ -65,7 +65,7 @@ public class UserController {
     public void googleLogin(@RequestParam String code, HttpServletResponse response) throws IOException {
         List<String> jwtTokenAndName = userService.socialLogin(code);
 
-        String redirectUrl = "/loginmypage?token=" + jwtTokenAndName.get(0) + "&username=" + jwtTokenAndName.get(1);
+        String redirectUrl = "http://localhost:3000/loginmypage?token=" + jwtTokenAndName.get(0) + "&username=" + jwtTokenAndName.get(1);
         response.sendRedirect(redirectUrl);
     }
 }
