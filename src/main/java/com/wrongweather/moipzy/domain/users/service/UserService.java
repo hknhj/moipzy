@@ -170,7 +170,7 @@ public class UserService {
             // redis에 kakaoId를 key로 하는 hash 사용
             redisTemplate.opsForHash().put(kakaoId, "userId", Integer.toString(userId));
 
-            log.info("kakaoId: {}, userId: {}", kakaoId, redisTemplate.opsForValue().get(kakaoId));
+            log.info("kakaoId: {}, userId: {}", kakaoId, redisTemplate.opsForHash().get(kakaoId, "userId"));
         }
     }
 }
