@@ -37,7 +37,7 @@ public class KaKaoService {
 
     public Map<String, Object> getStyleRecommends(String utterance, String kakaoId) {
         if (!isUserAuthenticated(kakaoId))
-            return errorMessage("등록되지 않은 유저입니다.");
+            return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
         String userId = redisTemplate.opsForValue().get(kakaoId);
 
@@ -161,7 +161,7 @@ public class KaKaoService {
 
     public Map<String, Object> getWeather(String userId) {
         if (!isUserAuthenticated(userId))
-            return errorMessage("등록되지 않은 유저입니다.");
+            return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 
@@ -188,11 +188,11 @@ public class KaKaoService {
 
     public Map<String, Object> getEvents(String kakaoId) {
         if (!isUserAuthenticated(kakaoId))
-            return errorMessage("등록되지 않은 유저입니다.");
+            return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
         String userId = redisTemplate.opsForValue().get("kakaoId:" + kakaoId);
         if (userId == null)
-            return errorMessage("등록되지 않은 유저입니다.");
+            return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
         // 오늘, 내일 일정 불러오기
         String todayEvent = (String) redisTemplate.opsForHash().get(userId, "today");
@@ -215,14 +215,16 @@ public class KaKaoService {
 
     public Map<String, Object> fallbackBlock(String utterance, String kakaoId) {
         if (isUserAuthenticated(kakaoId))
-            return errorMessage("이미 등록된 사용자입니다.");
+            return createSimpleTextResponse(Arrays.asList("이미 등록된 유저입니다."));
+
+        log.info("isAuthCode: {}", isAuthCode(utterance));
 
         if (Pattern.matches(EMAIL_REGEX, utterance)) { //폴백블록 이메일 입력했을 때
 
             String email = utterance;
 
             if (!userService.isRegistered(email))
-                return errorMessage("등록되지 않은 이메일입니다.");
+                return createSimpleTextResponse(Arrays.asList("등록되지 않은 이메일입니다."));
 
             String verification = emailService.sendVerificationEmail(email); // 입력받은 이메일로 인증 메일을 발송
             redisTemplate.opsForHash().put(kakaoId, "email", email); // key: kakaoId / value: verification, email
@@ -247,10 +249,10 @@ public class KaKaoService {
                 redisTemplate.opsForValue().set(kakaoId, userId); // key:kakaoId, value: userId
                 return createSimpleTextResponse(Arrays.asList("등록되었습니다."));
             } else {
-                return errorMessage("인증번호가 올바르지 않습니다.");
+                return createSimpleTextResponse(Arrays.asList("인증번호가 올바르지 않습니다."));
             }
         } else {
-            return errorMessage("잘못된 입력입니다.");
+            return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
         }
     }
 
@@ -262,22 +264,6 @@ public class KaKaoService {
     public boolean isAuthCode(String input) {
         // 인증번호는 4자리 숫자로만 구성된 문자열인지 확인
         return input != null && input.matches("\\d{4}");
-    }
-
-    // 등록되지 않은 유저입니다 simple text로 대답
-    public Map<String, Object> errorMessage(String message) {
-        // SimpleText 응답 생성
-        Map<String, Object> response = new HashMap<>();
-        Map<String, Object> template = new HashMap<>();
-        Map<String, Object> outputs = new HashMap<>();
-        Map<String, String> simpleText = new HashMap<>();
-
-        simpleText.put("type", message);
-        outputs.put("simpleText", simpleText);
-        template.put("outputs", outputs);
-        response.put("template", template);
-
-        return response;
     }
 
     // 출력하고자 하는 문장을 simpleText 형식의 JSON 구조를 생성
