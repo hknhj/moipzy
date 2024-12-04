@@ -23,7 +23,7 @@ public class User extends BaseTimeEntity{
     @Column(nullable = false, length = 30)
     private String username;
 
-    @Column(name = "kakao_id", length = 30)
+    @Column(name = "kakao_id", length = 100)
     private String kakaoId;
 
     public void updateKakaoId(String kakaoId) {
