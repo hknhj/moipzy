@@ -71,7 +71,7 @@ public class CalendarService {
 
         try {
 
-            if (tokenRepository.existsByUserId(userId))
+            if (!tokenRepository.existsByUserId(userId))
                 return null;
 
             // Map to store events for the requested date with time
