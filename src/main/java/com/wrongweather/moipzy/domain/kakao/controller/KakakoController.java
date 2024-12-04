@@ -2,6 +2,7 @@ package com.wrongweather.moipzy.domain.kakao.controller;
 
 import com.wrongweather.moipzy.domain.kakao.service.KaKaoService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,7 @@ import java.util.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/kakao")
+@Slf4j
 public class KakakoController {
 
     private final KaKaoService kaKaoService;
@@ -109,24 +111,28 @@ public class KakakoController {
 
     @PostMapping("/recommend")
     public Map<String, Object> recommend(@RequestBody Map<String, Object> requestBody) {
+        log.info("recommed requested");
         List<String> utteranceAndKakaoId = getUtteranceAndKakaoId(requestBody);
         return kaKaoService.getStyleRecommends(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
     }
 
     @PostMapping("/weather")
     public Map<String, Object> getWeather(@RequestBody Map<String, Object> requestBody) {
+        log.info("getWeather requested");
         String userId = getUtteranceAndKakaoId(requestBody).get(1);
         return kaKaoService.getWeather(userId);
     }
 
     @PostMapping("/calendar")
     public Map<String, Object> getCalendar(@RequestBody Map<String, Object> requestBody) {
+        log.info("getCalendar requested");
         String userId = getUtteranceAndKakaoId(requestBody).get(1);
         return kaKaoService.getEvents(userId);
     }
 
     @PostMapping("/fallback")
     public Map<String, Object> getFallback(@RequestBody Map<String, Object> requestBody) {
+        log.info("getFallback requested");
         List<String> utteranceAndKakaoId = getUtteranceAndKakaoId(requestBody);
         return kaKaoService.fallbackBlock(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
     }
