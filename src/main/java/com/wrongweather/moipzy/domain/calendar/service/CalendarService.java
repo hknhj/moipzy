@@ -56,8 +56,8 @@ public class CalendarService {
             redisTemplate.opsForHash().put(Integer.toString(userId), "today", todayEvents);
             redisTemplate.opsForHash().put(Integer.toString(userId), "tomorrow", tomorrowEvents);
 
-            log.info("events: {}", redisTemplate.opsForHash().get(Integer.toString(userId), "today"));
-            log.info("events: {}", redisTemplate.opsForHash().get(Integer.toString(userId), "tomorrow"));
+            log.info("userId: {}, events: {}", userId, redisTemplate.opsForHash().get(Integer.toString(userId), "today"));
+            log.info("userId: {}, events: {}", userId, redisTemplate.opsForHash().get(Integer.toString(userId), "tomorrow"));
         }
     }
 
@@ -96,8 +96,6 @@ public class CalendarService {
             String responseBody = response.getBody();
 
             List<Map<String, String>> events = getEventsWithTime(responseBody);
-
-            log.info("events : {}", events);
 
             eventMap.put(date, events);
 

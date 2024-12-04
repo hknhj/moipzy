@@ -45,7 +45,7 @@ public class TokenService {
                     // 토큰 갱신
                     token.updateAccessToken(response.getAccess_token());
                     tokenRepository.save(token);
-                    log.info("refresh completed");
+                    log.info("userId: {}, refresh completed", token.getUserId());
                 }
             } catch (Exception e) {
                 // 갱신 실패 시 로그

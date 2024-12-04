@@ -12,6 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -41,7 +43,12 @@ public class UserController {
     public String login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
         List<String> accessTokenAndName = userService.login(userLoginRequestDto);
 
-        return "redirect:/loginmypage?token=" + accessTokenAndName.get(0) + "&username=" + accessTokenAndName.get(1);  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
+        String token = accessTokenAndName.get(0);
+
+        String username = accessTokenAndName.get(1);
+        String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
+
+        return "redirect:/loginmypage?token=" + token + "&username=" + encodedUsername;  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
@@ -65,7 +72,13 @@ public class UserController {
     public void googleLogin(@RequestParam String code, HttpServletResponse response) throws IOException {
         List<String> jwtTokenAndName = userService.socialLogin(code);
 
-        String redirectUrl = "http://localhost:3000/loginmypage?token=" + jwtTokenAndName.get(0) + "&username=" + jwtTokenAndName.get(1);
+        String token = jwtTokenAndName.get(0);
+
+        String username = jwtTokenAndName.get(1);
+        //응답 헤더에 Location 필드에 포함된 한글(유니코드 문자)**이 HTTP 표준 범위를 초과한 값(0-255)을 포함하고 있어서 오류발생
+        String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
+
+        String redirectUrl = "http://localhost:3000/loginmypage?token=" + token + "&username=" + encodedUsername;
         response.sendRedirect(redirectUrl);
     }
 }

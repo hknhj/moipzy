@@ -12,7 +12,9 @@ import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
 import com.wrongweather.moipzy.global.exception.LoginFailedException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,14 +30,15 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final BCryptPasswordEncoder encoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final Environment env;
-
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     // 회원가입 서비스
     public UserIdResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
@@ -153,5 +156,19 @@ public class UserService {
 
     public boolean isRegistered(String email) {
         return userRepository.findByEmail(email).isPresent();
+    }
+
+    // 서버 시작할 때, kakaoId, userId 등록
+    public void getAllKakaoId() {
+        List<Object[]> results = userRepository.findUserAndKakaoIdForAllWithKakaoId();
+
+        for (Object[] result : results) {
+            int userId = Integer.parseInt((String) result[0]);
+            String kakaoId = (String) result[1];
+
+            redisTemplate.opsForValue().set(kakaoId, Integer.toString(userId));
+
+            log.info("kakaoId: {}, userId: {}", kakaoId, redisTemplate.opsForValue().get(kakaoId));
+        }
     }
 }

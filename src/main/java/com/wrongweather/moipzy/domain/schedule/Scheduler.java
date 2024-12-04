@@ -2,6 +2,7 @@ package com.wrongweather.moipzy.domain.schedule;
 
 import com.wrongweather.moipzy.domain.calendar.service.CalendarService;
 import com.wrongweather.moipzy.domain.token.service.TokenService;
+import com.wrongweather.moipzy.domain.users.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,11 +14,13 @@ import org.springframework.stereotype.Component;
 public class Scheduler {
     private final TokenService tokenService;
     private final CalendarService calendarService;
+    private final UserService userService;
 
     @PostConstruct
     public void init() {
         log.info("Token refresh and get calendar events");
         tokenService.refreshTokens();
         calendarService.getAllEvents();
+        userService.getAllKakaoId();
     }
 }
