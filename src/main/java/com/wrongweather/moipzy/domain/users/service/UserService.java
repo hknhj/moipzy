@@ -150,4 +150,12 @@ public class UserService {
     private Optional<User> userValid(String email) {
         return userRepository.findByEmail(email);
     }
+
+    public boolean isRegistered(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    public int getUserId(String email) {
+        return userRepository.findByEmail(email).get().getUserId();
+    }
 }

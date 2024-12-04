@@ -22,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -55,12 +56,13 @@ public class CalendarService {
             redisTemplate.opsForHash().put(Integer.toString(userId), "today", todayEvents);
             redisTemplate.opsForHash().put(Integer.toString(userId), "tomorrow", tomorrowEvents);
 
-            log.info("events: {}", redisTemplate.opsForHash().entries(Integer.toString(userId)));
+            log.info("events: {}", redisTemplate.opsForHash().get(Integer.toString(userId), "today"));
+            log.info("events: {}", redisTemplate.opsForHash().get(Integer.toString(userId), "tomorrow"));
         }
     }
 
-    // 매일 05:00 실행
-    @Scheduled(cron = "0 0 5 * * *")
+    // 매일 01:00 실행
+    @Scheduled(cron = "0 0 1 * * *")
     public void updateDailyEvents() {
         log.info("Updating daily events information...");
         getAllEvents();
@@ -76,8 +78,8 @@ public class CalendarService {
             DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
             // Generate start and end times in UTC
-            String startOfDay = date.atStartOfDay(ZoneOffset.UTC).format(utcFormatter);
-            String endOfDay = date.atTime(23, 59, 59).atOffset(ZoneOffset.UTC).format(utcFormatter);
+            String startOfDay = date.atStartOfDay(ZoneId.of("Asia/Seoul")).withZoneSameInstant(ZoneId.of("UTC")).format(utcFormatter);
+            String endOfDay = date.atTime(23, 59, 59).atZone(ZoneId.of("Asia/Seoul")).withZoneSameInstant(ZoneId.of("UTC")).format(utcFormatter);
 
             // Get date's URL in UTC format
             String todayUrl = getUrl(startOfDay, endOfDay);
@@ -91,15 +93,15 @@ public class CalendarService {
             HttpEntity<String> request = new HttpEntity<>(headers);
 
             ResponseEntity<String> response = restTemplate.exchange(todayUrl, HttpMethod.GET, request, String.class);
-
             String responseBody = response.getBody();
+
             List<Map<String, String>> events = getEventsWithTime(responseBody);
 
             log.info("events : {}", events);
 
             eventMap.put(date, events);
 
-            String result = "Event: ";
+            String result = "";
 
             // 각 날짜별 이벤트에서 summary만 추출
             for (Map.Entry<LocalDate, List<Map<String, String>>> entry : eventMap.entrySet()) {

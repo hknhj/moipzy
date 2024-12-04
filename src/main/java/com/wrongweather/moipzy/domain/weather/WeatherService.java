@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -133,22 +131,5 @@ public class WeatherService {
         temperatures.add(tomorrowMax);
 
         return temperatures;
-    }
-
-    public String convertDate(String date) {
-        LocalDate today = LocalDate.now();
-        LocalDate resultDate;
-
-        if (date.equalsIgnoreCase("today")) {
-            resultDate = today;
-        } else if (date.equalsIgnoreCase("tomorrow")) {
-            resultDate = today.plusDays(1);
-        } else {
-            throw new IllegalArgumentException("오늘 또는 내일을 입력해주세요");
-        }
-
-        //날짜를 "yyyyddyy" 형식으로 변환
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        return resultDate.format(formatter);
     }
 }
