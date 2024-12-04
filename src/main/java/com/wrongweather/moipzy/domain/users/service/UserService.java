@@ -167,7 +167,8 @@ public class UserService {
             int userId = (int) result[0]; // 수정: 캐스팅을 int로 변경
             String kakaoId = (String) result[1];
 
-            redisTemplate.opsForValue().set(kakaoId, Integer.toString(userId));
+            // redis에 kakaoId를 key로 하는 hash 사용
+            redisTemplate.opsForHash().put(kakaoId, "userId", Integer.toString(userId));
 
             log.info("kakaoId: {}, userId: {}", kakaoId, redisTemplate.opsForValue().get(kakaoId));
         }

@@ -75,6 +75,8 @@ public class KaKaoService {
         //기온과 일정을 토대로 옷차림을 추천함
         List<StyleRecommendResponseDto> recommends = styleService.recommend(Integer.parseInt(userId), minTemp, maxTemp, events);
 
+        List<String> clothIds = new ArrayList<>();
+
         // JSON 응답 구조 생성
         Map<String, Object> response = new HashMap<>();
         response.put("version", "2.0");
@@ -85,6 +87,10 @@ public class KaKaoService {
 
         //recommend 각 요소의 url은 완전한 url임. 그대로 사용하면 됨
         for (StyleRecommendResponseDto recommend : recommends) {
+
+            // 옷 조합의 id들을 저장하기 위한 문자열
+            String ids = "";
+
             // 카로셀 아이템들 생성
             Map<String, Object> carousel = new HashMap<>();
             carousel.put("type", "basicCard");
@@ -105,9 +111,12 @@ public class KaKaoService {
                 outerThumbnail.put("fixedRatio", true);
                 outerItem.put("thumbnail", outerThumbnail);
                 items.add(outerItem);
+                ids+=recommend.getOuterId()+",";
             }
 
             // 상의 아이템
+            if (recommend.getTopId() == 0)
+                break;
             Map<String, Object> topItem = new HashMap<>();
             topItem.put("title", "상의");
             Color topColor = recommend.getTopColor();
@@ -119,8 +128,11 @@ public class KaKaoService {
             topThumbnail.put("fixedRatio", true);
             topItem.put("thumbnail", topThumbnail);
             items.add(topItem);
+            ids+=recommend.getTopId()+",";
 
             // 하의 아이템
+            if (recommend.getBottomId() == 0)
+                break;
             Map<String, Object> bottomItem = new HashMap<>();
             bottomItem.put("title", "하의");
             Color bottomColor = recommend.getBottomColor();
@@ -132,25 +144,25 @@ public class KaKaoService {
             bottomThumbnail.put("fixedRatio", true);
             bottomItem.put("thumbnail", bottomThumbnail);
             items.add(bottomItem);
+            ids+=recommend.getBottomId();
 
             carousel.put("items", items);
             outputs.add(Map.of("carousel", carousel));
+            clothIds.add(ids);
         }
-
-        // 기온 정보를 텍스트로 추가
-        Map<String, Object> temperatureText = new HashMap<>();
-        temperatureText.put("type", "simpleText");
-        temperatureText.put("text", date + "의 기온은 최저 " + minTemp + "°C, 최고 " + maxTemp + "°C입니다.");
-        outputs.add(temperatureText);
-
-        // 일정 정보를 텍스트로 추가
-        Map<String, Object> scheduleText = new HashMap<>();
-        scheduleText.put("type", "simpleText");
-        scheduleText.put("text", date + "의 일정은 다음과 같습니다: " + events);
-        outputs.add(scheduleText);
 
         template.put("outputs", outputs);
         response.put("template", template);
+
+        // 똑같은 곳에 쓰면 덮어씌워진다
+        // todayRecommend, tomorrowRecommend
+        // 덮는 대신 지우고 다시 쓴다
+        redisTemplate.opsForHash().delete(kakaoId, eventDate + "Recommend");
+        int i=1;
+        for (String clothId : clothIds) {
+            redisTemplate.opsForHash().put(kakaoId, eventDate + "Recommend" + i, clothId);
+            log.info(eventDate + "Recommend" + i + ": {}", clothId);
+        }
 
         long afterTime = System.currentTimeMillis();
 
