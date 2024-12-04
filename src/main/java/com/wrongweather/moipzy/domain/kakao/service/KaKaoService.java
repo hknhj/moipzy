@@ -41,7 +41,7 @@ public class KaKaoService {
         if (!isUserAuthenticated(kakaoId))
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
-        String userId = redisTemplate.opsForValue().get(kakaoId);
+        String userId = (String) redisTemplate.opsForHash().get(kakaoId, "userId");
 
         long beforeTime = System.currentTimeMillis();
 
@@ -157,11 +157,13 @@ public class KaKaoService {
         // 똑같은 곳에 쓰면 덮어씌워진다
         // todayRecommend, tomorrowRecommend
         // 덮는 대신 지우고 다시 쓴다
-        redisTemplate.opsForHash().delete(kakaoId, eventDate + "Recommend");
+        for (int i = 1; i <= 3; i++)
+            redisTemplate.opsForHash().delete(kakaoId, eventDate + "Recommend"+i);
+
         int i=1;
         for (String clothId : clothIds) {
             redisTemplate.opsForHash().put(kakaoId, eventDate + "Recommend" + i, clothId);
-            log.info(eventDate + "Recommend" + i + ": {}", clothId);
+            log.info(eventDate+"Recommend: {}", redisTemplate.opsForHash().get(kakaoId, eventDate + "Recommend"+i));
         }
 
         long afterTime = System.currentTimeMillis();
