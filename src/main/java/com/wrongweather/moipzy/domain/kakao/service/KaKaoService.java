@@ -237,7 +237,7 @@ public class KaKaoService {
             String verification = utterance;
             String email = (String) redisTemplate.opsForHash().get(kakaoId, "email"); //email 추출
 
-            if (utterance.equals(redisTemplate.opsForHash().get(kakaoId, verification))) {
+            if (utterance.equals(redisTemplate.opsForHash().get(kakaoId, "verification"))) {
                 redisTemplate.opsForSet().add("kakaoIds", kakaoId); // kakaoIds에 kakaoId 추가
 
                 redisTemplate.delete(kakaoId); // kakaoId가 key인 인증 데이터 삭제
