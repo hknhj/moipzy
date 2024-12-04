@@ -5,6 +5,7 @@ import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.email.service.EmailService;
 import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
 import com.wrongweather.moipzy.domain.style.service.StyleService;
+import com.wrongweather.moipzy.domain.token.TokenRepository;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.service.UserService;
@@ -29,6 +30,7 @@ public class KaKaoService {
     private final EmailService emailService;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
     // kakao id 빠른 조회를 위한 SET KEY
     private static final String USER_SET_KEY = "kakaoIds";
@@ -190,9 +192,12 @@ public class KaKaoService {
         if (!isUserAuthenticated(kakaoId))
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
-        String userId = redisTemplate.opsForValue().get("kakaoId:" + kakaoId);
+        String userId = redisTemplate.opsForValue().get(kakaoId);
         if (userId == null)
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
+
+        if (tokenRepository.existsByUserId(Integer.parseInt(userId)))
+            return createSimpleTextResponse(Arrays.asList("구글 캘린더와 연동되지 않은 계정입니다."));
 
         // 오늘, 내일 일정 불러오기
         String todayEvent = (String) redisTemplate.opsForHash().get(userId, "today");
@@ -207,8 +212,18 @@ public class KaKaoService {
         String formattedTodayDate = today.format(formatter);
         String formattedTomorrowDate = tomorrow.format(formatter);
 
-        String todayEventExplanation = formattedTodayDate + " 오늘 일정: " + todayEvent;
+        String todayEventExplanation = formattedTodayDate + " 오늘 일정: ";
+        if (todayEvent == null) {
+            todayEventExplanation += "없음";
+        } else {
+            todayEventExplanation += todayEvent;
+        }
         String tomorrowEventExplanation = formattedTomorrowDate + " 내일 일정: " + tomorrowEvent;
+        if (tomorrowEvent == null) {
+            tomorrowEventExplanation += "없음";
+        } else {
+            tomorrowEventExplanation += tomorrowEvent;
+        }
 
         return createSimpleTextResponse(Arrays.asList(todayEventExplanation, tomorrowEventExplanation));
     }

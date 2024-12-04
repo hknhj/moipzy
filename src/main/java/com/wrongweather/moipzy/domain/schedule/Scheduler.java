@@ -18,7 +18,6 @@ public class Scheduler {
 
     @PostConstruct
     public void init() {
-        log.info("Token refresh and get calendar events");
         tokenService.refreshTokens();
         calendarService.getAllEvents();
         userService.getAllKakaoId();

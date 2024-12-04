@@ -35,6 +35,7 @@ public class TokenService {
     private String tokenUri;
 
     public void refreshTokens() {
+        log.info("Refreshing tokens");
         List<Token> tokens = tokenRepository.findAll(); // DB에서 모든 토큰 조회
 
         for (Token token : tokens) {

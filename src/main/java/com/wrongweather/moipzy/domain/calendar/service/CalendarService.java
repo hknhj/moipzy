@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wrongweather.moipzy.domain.token.Token;
 import com.wrongweather.moipzy.domain.token.TokenRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -43,6 +41,7 @@ public class CalendarService {
 
     //캘린더 업데이트 메서드
     public void getAllEvents() {
+        log.info("getAllEvents");
         List<Token> tokens = tokenRepository.findAll();
         for (Token token : tokens) {
             int userId = token.getUserId();

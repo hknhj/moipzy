@@ -160,10 +160,11 @@ public class UserService {
 
     // 서버 시작할 때, kakaoId, userId 등록
     public void getAllKakaoId() {
+        log.info("getAllKakaoId");
         List<Object[]> results = userRepository.findUserAndKakaoIdForAllWithKakaoId();
 
         for (Object[] result : results) {
-            int userId = Integer.parseInt((String) result[0]);
+            int userId = (int) result[0]; // 수정: 캐스팅을 int로 변경
             String kakaoId = (String) result[1];
 
             redisTemplate.opsForValue().set(kakaoId, Integer.toString(userId));
