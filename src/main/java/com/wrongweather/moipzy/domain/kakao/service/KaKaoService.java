@@ -293,9 +293,12 @@ public class KaKaoService {
         // 메시지 리스트를 반복하며 simpleText 객체 생성
         for (String message : messages) {
             Map<String, Object> simpleText = new HashMap<>();
-            simpleText.put("type", "simpleText");
-            simpleText.put("text", message);
-            outputs.add(simpleText);
+            simpleText.put("text", message); //text 내용 설정
+
+            // simpleText를 포함한 outputs 항목 생성
+            Map<String, Object> output = new HashMap<>();
+            output.put("simpleText", simpleText);
+            outputs.add(output);
         }
 
         template.put("outputs", outputs);
