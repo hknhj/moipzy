@@ -218,7 +218,7 @@ public class KaKaoService {
         } else {
             todayEventExplanation += todayEvent;
         }
-        String tomorrowEventExplanation = formattedTomorrowDate + " 내일 일정: " + tomorrowEvent;
+        String tomorrowEventExplanation = formattedTomorrowDate + " 내일 일정: ";
         if (tomorrowEvent == null) {
             tomorrowEventExplanation += "없음";
         } else {
