@@ -5,6 +5,8 @@ import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.email.service.EmailService;
 import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
 import com.wrongweather.moipzy.domain.style.service.StyleService;
+import com.wrongweather.moipzy.domain.users.User;
+import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public class KaKaoService {
     private final RedisTemplate<String, String> redisTemplate;
     private final EmailService emailService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     // kakao id 빠른 조회를 위한 SET KEY
     private static final String USER_SET_KEY = "kakaoIds";
@@ -234,8 +237,13 @@ public class KaKaoService {
 
             if (utterance.equals(redisTemplate.opsForHash().get(kakaoId, verification))) {
                 redisTemplate.opsForSet().add("kakaoIds", kakaoId); // kakaoIds에 kakaoId 추가
+
                 redisTemplate.delete(kakaoId); // kakaoId가 key인 인증 데이터 삭제
-                String userId = Integer.toString(userService.getUserId(email)); // email로 userId 찾기
+                User user = userRepository.findByEmail(email).get(); // repository를 직접적으로 이용해서 dirty checking이 가능해서 자동으로
+                String userId = Integer.toString(user.getUserId()); // email로 userId 찾기
+                user.updateKakaoId(kakaoId);
+                userRepository.save(user); //kakao_id column 업데이트
+
                 redisTemplate.opsForValue().set(kakaoId, userId); // key:kakaoId, value: userId
                 return createSimpleTextResponse(Arrays.asList("등록되었습니다."));
             } else {

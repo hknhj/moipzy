@@ -154,8 +154,4 @@ public class UserService {
     public boolean isRegistered(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
-
-    public int getUserId(String email) {
-        return userRepository.findByEmail(email).get().getUserId();
-    }
 }
