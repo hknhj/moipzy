@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("moipzy/style")
+@RequestMapping("/moipzy/style")
 @RequiredArgsConstructor
 @Slf4j
 public class StyleController {
@@ -28,8 +28,8 @@ public class StyleController {
 
     // 옷 추천 controller
     @GetMapping("/recommend")
-    public List<StyleRecommendResponseDto> recommendByHighLow(@RequestParam int userId, @RequestParam int highTemp, @RequestParam int lowTemp) {
-        return styleService.recommend(userId, highTemp, lowTemp);
+    public List<StyleRecommendResponseDto> recommendByHighLow(@RequestParam int userId, @RequestParam int highTemp, @RequestParam int lowTemp, @RequestParam String event) {
+        return styleService.recommend(userId, highTemp, lowTemp, event);
     }
 
     // 옷차림 등록 controller

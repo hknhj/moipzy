@@ -73,7 +73,7 @@ public class KaKaoService {
         log.info("successful");
 
         //기온과 일정을 토대로 옷차림을 추천함
-        List<StyleRecommendResponseDto> recommends = styleService.recommendTest(Integer.parseInt(userId), minTemp, maxTemp, events);
+        List<StyleRecommendResponseDto> recommends = styleService.recommend(Integer.parseInt(userId), minTemp, maxTemp, events);
 
         // JSON 응답 구조 생성
         Map<String, Object> response = new HashMap<>();

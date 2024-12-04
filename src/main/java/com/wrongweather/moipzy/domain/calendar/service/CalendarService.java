@@ -70,6 +70,10 @@ public class CalendarService {
     public String getEvents(int userId, LocalDate date) {
 
         try {
+
+            if (tokenRepository.existsByUserId(userId))
+                return null;
+
             // Map to store events for the requested date with time
             Map<LocalDate, List<Map<String, String>>> eventMap = new HashMap<>();
 

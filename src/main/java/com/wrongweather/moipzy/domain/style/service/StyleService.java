@@ -34,7 +34,7 @@ public class StyleService {
     private final int INF_HIGH_TEMPERATURE = 70;
     private final int INF_LOW_TEMPERATURE = -70;
 
-    public List<StyleRecommendResponseDto> recommend(int userId, int highTemp, int lowTemp) {
+    public List<StyleRecommendResponseDto> recommendTest(int userId, int highTemp, int lowTemp) {
         String prompt = "High temperature: "+ highTemp
                      + ", Low temperature: "+ lowTemp + "\n";
 
@@ -126,7 +126,7 @@ public class StyleService {
         return recommends;
     }
 
-    public List<StyleRecommendResponseDto> recommendTest(int userId, int highTemp, int lowTemp, String events) {
+    public List<StyleRecommendResponseDto> recommend(int userId, int highTemp, int lowTemp, String events) {
         String prompt = "High temperature: "+ highTemp
                 + ", Low temperature: "+ lowTemp + "\n";
 
