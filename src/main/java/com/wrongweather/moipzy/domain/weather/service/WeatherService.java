@@ -3,7 +3,6 @@ package com.wrongweather.moipzy.domain.weather.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +12,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.client.RestTemplate;
@@ -37,26 +35,13 @@ public class WeatherService {
     @Value("${openWeather.api}")
     String openWeatherApiKey;
 
-    // 서버 시작 시 실행
-    @PostConstruct
-    public void initDailyWeather() {
-        log.info("Initializing daily weather information at server startup...");
-        getWeather();
-    }
-
-    // 매일 05:00 실행
-    @Scheduled(cron = "0 0 5 * * *")
-    public void updateDailyWeather() {
-        log.info("Updating daily weather information...");
-        getWeather();
-    }
-
     //todayMinTemp
     //todayMaxTemp
     //tomorrowMinTemp
     //tomorrowMaxTemp
     //redis에 저장
     public void getWeather() {
+        log.info("Initializing daily weather information at server startup...");
         String requestURL = "https://api.openweathermap.org/data/2.5/forecast" +
                 "?lat=37" +
                 "&lon=127" +

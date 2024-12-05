@@ -3,6 +3,7 @@ package com.wrongweather.moipzy.domain.schedule;
 import com.wrongweather.moipzy.domain.calendar.service.CalendarService;
 import com.wrongweather.moipzy.domain.token.service.TokenService;
 import com.wrongweather.moipzy.domain.users.service.UserService;
+import com.wrongweather.moipzy.domain.weather.service.WeatherService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +17,14 @@ public class Scheduler {
     private final TokenService tokenService;
     private final CalendarService calendarService;
     private final UserService userService;
+    private final WeatherService weatherService;
 
     @PostConstruct
     public void init() {
         tokenService.refreshTokens();
         calendarService.getAllEvents();
         userService.getAllKakaoId();
+        weatherService.getWeather();
     }
 
     // 매일 01:00 일정 업데이트
@@ -36,5 +39,12 @@ public class Scheduler {
     public void refreshTokensPeriodically() {
         log.info("Refresh tokens periodically");
         tokenService.refreshTokens();
+    }
+
+    // 매일 05:00 날씨 업데이트
+    @Scheduled(cron = "0 0 5 * * *")
+    public void updateDailyWeather() {
+        log.info("Updating daily weather information...");
+        weatherService.getWeather();
     }
 }
