@@ -10,7 +10,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -72,11 +71,5 @@ public class TokenService {
         ResponseEntity<GoogleTokenResponse> response = restTemplate.postForEntity(tokenUri, request, GoogleTokenResponse.class);
 
         return response.getBody();
-    }
-
-    @Scheduled(fixedRate = 3600000) // 1시간마다 실행 (밀리초 단위)
-    public void refreshTokensPeriodically() {
-        log.info("Refresh tokens periodically");
-        refreshTokens();
     }
 }

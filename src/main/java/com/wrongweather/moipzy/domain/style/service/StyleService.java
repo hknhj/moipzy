@@ -29,7 +29,6 @@ public class StyleService {
     private final StyleRepository styleRepository;
     private final UserRepository userRepository;
     private final ChatGPTService chatGPTService;
-    private final CalendarService calendarService;
 
     private final int INF_HIGH_TEMPERATURE = 70;
     private final int INF_LOW_TEMPERATURE = -70;
@@ -252,9 +251,11 @@ public class StyleService {
                     if (outerLowTemp != INF_LOW_TEMPERATURE) //두꺼운 코트, 두꺼운 패딩은 더우면 최대 온도만 낮추고, 최저 온도는 그대로
                         outer.setLowTemperature(modLowTemp1);
                     clothRepository.save(outer);
+                    style.updateFeedback(feedback);
                     break;
 
                 case GOOD:
+                    style.updateFeedback(feedback);
                     break;
 
                 case COLD: //최저기온 17도에서 해당 아우터 입고 추웠으면, 해당 옷은 더 더울 때 입어야되므로 구간을 올린다
@@ -265,6 +266,7 @@ public class StyleService {
                         outer.setLowTemperature(modLowTemp2);
                     }
                     clothRepository.save(outer);
+                    style.updateFeedback(feedback);
                     break;
 
                 default:
@@ -284,9 +286,11 @@ public class StyleService {
                         top.setSoloLowTemperature(modSoloLowTemp1);
                     }
                     clothRepository.save(top);
+                    style.updateFeedback(feedback);
                     break;
 
                 case GOOD:
+                    style.updateFeedback(feedback);
                     break;
 
                 case COLD:
@@ -296,6 +300,7 @@ public class StyleService {
                         top.setSoloHighTemperature(modSoloHighTemp2);
                     top.setSoloLowTemperature(modSoloLowTemp2);
                     clothRepository.save(top);
+                    style.updateFeedback(feedback);
                     break;
 
                 default:
@@ -306,6 +311,10 @@ public class StyleService {
         style.updateFeedback(feedback);
 
         return styleRepository.save(style).getStyleId();
+    }
+
+    public int getStyleIdByWearAt(LocalDate date) {
+        return styleRepository.findByWearAt(date).get().getStyleId();
     }
 
 }

@@ -6,6 +6,7 @@ import com.wrongweather.moipzy.domain.users.service.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,5 +22,19 @@ public class Scheduler {
         tokenService.refreshTokens();
         calendarService.getAllEvents();
         userService.getAllKakaoId();
+    }
+
+    // 매일 01:00 일정 업데이트
+    @Scheduled(cron = "0 0 1 * * *")
+    public void updateDailyEvents() {
+        log.info("Updating daily events information...");
+        calendarService.getAllEvents();
+    }
+
+    // 1시간마다 google access token update
+    @Scheduled(fixedRate = 3600000)
+    public void refreshTokensPeriodically() {
+        log.info("Refresh tokens periodically");
+        tokenService.refreshTokens();
     }
 }

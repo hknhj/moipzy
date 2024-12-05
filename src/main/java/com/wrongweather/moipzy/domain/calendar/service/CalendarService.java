@@ -13,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -58,13 +57,6 @@ public class CalendarService {
             log.info("userId: {}, events: {}", userId, redisTemplate.opsForHash().get(Integer.toString(userId), "today"));
             log.info("userId: {}, events: {}", userId, redisTemplate.opsForHash().get(Integer.toString(userId), "tomorrow"));
         }
-    }
-
-    // 매일 01:00 실행
-    @Scheduled(cron = "0 0 1 * * *")
-    public void updateDailyEvents() {
-        log.info("Updating daily events information...");
-        getAllEvents();
     }
 
     public String getEvents(int userId, LocalDate date) {
