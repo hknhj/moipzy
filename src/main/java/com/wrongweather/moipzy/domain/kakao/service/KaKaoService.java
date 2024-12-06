@@ -238,7 +238,7 @@ public class KaKaoService {
         if (!isUserAuthenticated(kakaoId))
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
-        String userId = redisTemplate.opsForValue().get(kakaoId);
+        String userId = (String) redisTemplate.opsForHash().get(kakaoId, "userId");
         if (userId == null)
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
