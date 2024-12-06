@@ -245,7 +245,7 @@ public class KaKaoService {
         if (userId == null)
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
-        if (tokenRepository.existsByUserId(Integer.parseInt(userId)))
+        if (!tokenRepository.existsByUserId(Integer.parseInt(userId)))
             return createSimpleTextResponse(Arrays.asList("구글 캘린더와 연동되지 않은 계정입니다."));
 
         // 오늘, 내일 일정 불러오기
