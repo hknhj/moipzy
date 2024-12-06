@@ -120,7 +120,8 @@ public class CalendarService {
                         // 이벤트 상세 정보 추가
                         eventDetails.append("- ").append(summary).append(" (")
                                 .append(startFormatted).append("~")
-                                .append(endFormatted).append(")");
+                                .append(endFormatted).append(")")
+                                .append("\n\n");
                     }
                 }
                 //날짜와 summary 출력
