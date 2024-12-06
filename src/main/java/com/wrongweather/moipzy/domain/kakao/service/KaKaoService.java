@@ -628,7 +628,7 @@ public class KaKaoService {
         user.updateKakaoId(kakaoId);
         userRepository.save(user); //kakao_id column 업데이트
 
-        redisTemplate.opsForValue().set(kakaoId, userId); // key:kakaoId, value: userId
+        redisTemplate.opsForHash().put(kakaoId, "userId", userId); // key:kakaoId, value: userId
     }
 
     // 인증된 유저인지 확인
