@@ -428,8 +428,14 @@ public class KaKaoService {
             }
 
         } else if (isSelectNumber(utterance)) { // 옷추천 밑에 (1번/2번/3번) quickReplies를 이용해서 연동
-            Pattern pattern = Pattern.compile(SELECT_REGEX);
-            Matcher matcher = pattern.matcher(utterance);
+
+            String noSpace = utterance.replace(" ", "");
+
+            if (noSpace.length() != 4)
+                return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
+
+            String koreanDate = noSpace.substring(0,2);
+            String number = noSpace.substring(2, 3);
 
             LocalDate today = LocalDate.now();
             LocalDate tomorrow = today.plusDays(1);
@@ -441,18 +447,18 @@ public class KaKaoService {
             int maxTemp = 100;
 
             String date = "";
-            if (matcher.group(1).equals("오늘")) {
+            if (koreanDate.equals("오늘")) {
                 date = formattedTodayDate;
                 minTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMinTemp"));
                 maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMaxTemp"));
             }
-            else if (matcher.group(1).equals("내일")){
+            else if (koreanDate.equals("내일")){
                 date = formattedTomorrowDate;
                 minTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMinTemp"));
                 maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMaxTemp"));
             }
 
-            String result = (String) redisTemplate.opsForHash().get(kakaoId, date + "Recommend" + matcher.group(2)); //91,78,84
+            String result = (String) redisTemplate.opsForHash().get(kakaoId, date + "Recommend" + number); //91,78,84
 
             String[] idArray = result.split(",");
 
@@ -486,7 +492,7 @@ public class KaKaoService {
                     .userId(Integer.parseInt(userId))
                     .build());
 
-            return createSimpleTextResponse(Arrays.asList(matcher.group(1) + "번 옷차림이 등록되었습니다."));
+            return createSimpleTextResponse(Arrays.asList(number + "번 옷차림이 등록되었습니다."));
 
         } else if (utterance.contains("더움") || utterance.contains("만족") || utterance.contains("추움")) { // 옷차림 보여주고 (오늘/내일)+(더움/만족/추움) quickReplies 사용
 
