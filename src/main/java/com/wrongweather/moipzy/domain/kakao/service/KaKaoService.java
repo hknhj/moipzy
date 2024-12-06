@@ -332,6 +332,9 @@ public class KaKaoService {
         // 카로셀 아이템 목록
         List<Map<String, Object>> items = new ArrayList<>();
 
+        // full url
+        String fullurl = "https://moipzy.shop";
+
         // 아우터 아이템
         if (Integer.parseInt(idArray[0]) != 0) {
             Map<String, Object> outerItem = new HashMap<>();
@@ -341,7 +344,7 @@ public class KaKaoService {
             String outerDescription = outerColor.name() + " " + outerSmallCategory.name();
             outerItem.put("description", outerDescription);
             Map<String, Object> outerThumbnail = new HashMap<>();
-            outerThumbnail.put("imageUrl", outer.getClothImg().getImgUrl());
+            outerThumbnail.put("imageUrl", fullurl + outer.getClothImg().getImgUrl());
             outerThumbnail.put("fixedRatio", true);
             outerItem.put("thumbnail", outerThumbnail);
             items.add(outerItem);
@@ -356,7 +359,7 @@ public class KaKaoService {
             String topDescription = topColor.name() + " " + topSmallCategory.name();
             topItem.put("description", topDescription);
             Map<String, Object> topThumbnail = new HashMap<>();
-            topThumbnail.put("imageUrl", top.getClothImg().getImgUrl());
+            topThumbnail.put("imageUrl", fullurl + top.getClothImg().getImgUrl());
             topThumbnail.put("fixedRatio", true);
             topItem.put("thumbnail", topThumbnail);
             items.add(topItem);
@@ -371,7 +374,7 @@ public class KaKaoService {
             String bottomDescription = bottomColor.name() + " " + bottomSmallCategory.name();
             bottomItem.put("description", bottomDescription);
             Map<String, Object> bottomThumbnail = new HashMap<>();
-            bottomThumbnail.put("imageUrl", bottom.getClothImg().getImgUrl());
+            bottomThumbnail.put("imageUrl", fullurl + bottom.getClothImg().getImgUrl());
             bottomThumbnail.put("fixedRatio", true);
             bottomItem.put("thumbnail", bottomThumbnail);
             items.add(bottomItem);
