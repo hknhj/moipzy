@@ -181,6 +181,7 @@ public class KaKaoService {
             quickReply.put("messageText", koreanDate + " " + (i + 1) + "번"); //오늘 1번
             quickReply.put("action", "message");
             quickReply.put("label", (i + 1) + "번");
+            quickReplies.add(quickReply);
         }
 
         template.put("outputs", outputs);
