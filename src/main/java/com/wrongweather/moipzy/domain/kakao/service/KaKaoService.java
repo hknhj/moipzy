@@ -5,6 +5,8 @@ import com.wrongweather.moipzy.domain.clothes.ClothRepository;
 import com.wrongweather.moipzy.domain.clothes.category.Color;
 import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.email.service.EmailService;
+import com.wrongweather.moipzy.domain.style.Style;
+import com.wrongweather.moipzy.domain.style.StyleRepository;
 import com.wrongweather.moipzy.domain.style.dto.Feedback;
 import com.wrongweather.moipzy.domain.style.dto.StyleFeedbackRequestDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
@@ -32,6 +34,7 @@ import java.util.regex.Pattern;
 public class KaKaoService {
 
     private final StyleService styleService;
+    private final StyleRepository styleRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final EmailService emailService;
     private final UserService userService;
@@ -134,7 +137,7 @@ public class KaKaoService {
                 outerThumbnail.put("fixedRatio", true);
                 outerItem.put("thumbnail", outerThumbnail);
                 items.add(outerItem);
-                ids+=recommend.getOuterId()+",";
+                ids += recommend.getOuterId() + ",";
             }
 
             // 상의 아이템
@@ -151,7 +154,7 @@ public class KaKaoService {
             topThumbnail.put("fixedRatio", true);
             topItem.put("thumbnail", topThumbnail);
             items.add(topItem);
-            ids+=recommend.getTopId()+",";
+            ids += recommend.getTopId() + ",";
 
             // 하의 아이템
             if (recommend.getBottomId() == 0)
@@ -167,7 +170,7 @@ public class KaKaoService {
             bottomThumbnail.put("fixedRatio", true);
             bottomItem.put("thumbnail", bottomThumbnail);
             items.add(bottomItem);
-            ids+=recommend.getBottomId();
+            ids += recommend.getBottomId();
 
             carousel.put("items", items);
             outputs.add(Map.of("carousel", carousel));
@@ -195,7 +198,7 @@ public class KaKaoService {
         for (int i = 1; i <= 3; i++)
             redisTemplate.opsForHash().delete(kakaoId, eventDate + "Recommend" + i); //24-12-05Recommend1
 
-        int i=1;
+        int i = 1;
         for (String clothId : clothIds) {
             redisTemplate.opsForHash().put(kakaoId, eventDate + "Recommend" + i, clothId);
             log.info(eventDate + "Recommend" + i + ": {}", redisTemplate.opsForHash().get(kakaoId, eventDate + "Recommend" + i)); //24-12-05Recommend2
@@ -293,8 +296,9 @@ public class KaKaoService {
             koreanDate = "어제";
         }
 
-        if (style.equals(""))
+        if (style == null || style.isEmpty())
             return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
+
 
         String[] idArray = style.split(",");
         int outerId = 0;
@@ -380,17 +384,17 @@ public class KaKaoService {
         //quickReplies
         List<Map<String, Object>> quickReplies = new ArrayList<>();
         quickReplies.add(Map.of(
-                "messageText", koreanDate +" 더움",
+                "messageText", koreanDate + " 더움",
                 "action", "message",
                 "label", "더움"
         ));
         quickReplies.add(Map.of(
-                "messageText", koreanDate +" 만족",
+                "messageText", koreanDate + " 만족",
                 "action", "message",
                 "label", "만족"
         ));
         quickReplies.add(Map.of(
-                "messageText", koreanDate +" 추움",
+                "messageText", koreanDate + " 추움",
                 "action", "message",
                 "label", "추움"
         ));
@@ -434,7 +438,7 @@ public class KaKaoService {
             if (noSpace.length() != 4)
                 return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
 
-            String koreanDate = noSpace.substring(0,2);
+            String koreanDate = noSpace.substring(0, 2);
             String number = noSpace.substring(2, 3);
 
             LocalDate today = LocalDate.now();
@@ -442,6 +446,7 @@ public class KaKaoService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String formattedTodayDate = today.format(formatter);
             String formattedTomorrowDate = tomorrow.format(formatter);
+            LocalDate styleDate = LocalDate.now();
 
             int minTemp = -100;
             int maxTemp = 100;
@@ -451,11 +456,12 @@ public class KaKaoService {
                 date = formattedTodayDate;
                 minTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMinTemp"));
                 maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMaxTemp"));
-            }
-            else if (koreanDate.equals("내일")){
+                styleDate = today;
+            } else if (koreanDate.equals("내일")) {
                 date = formattedTomorrowDate;
                 minTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMinTemp"));
                 maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMaxTemp"));
+                styleDate = tomorrow;
             }
 
             String result = (String) redisTemplate.opsForHash().get(kakaoId, date + "Recommend" + number); //91,78,84
@@ -482,15 +488,27 @@ public class KaKaoService {
             redisTemplate.opsForHash().put(kakaoId, date + "Style", result);
 
             // 옷차림 db에 저장
-            // 이미 옷차림이 등록돼있을 때 고려하는 코드 필요
-            styleService.uploadStyle(StyleUploadRequestDto.builder()
-                    .outerId(outerId)
-                    .topId(topId)
-                    .bottomId(bottomId)
-                    .highTemp(maxTemp)
-                    .lowTemp(minTemp)
-                    .userId(Integer.parseInt(userId))
-                    .build());
+            // style을 조회해서, 존재하면 수정, 없으면 추가
+            Optional<Style> existingStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), styleDate);
+            if (existingStyle.isPresent()) {
+                Style style = existingStyle.get();
+
+                Cloth outer = clothRepository.findByClothId(outerId).orElseGet(null);
+                Cloth top = clothRepository.findByClothId(topId).orElseGet(null);
+                Cloth bottom = clothRepository.findByClothId(bottomId).orElseGet(null);
+
+                style.updateStyle(outer, top, bottom);
+                styleRepository.save(style);
+            } else {
+                styleService.uploadStyle(StyleUploadRequestDto.builder()
+                        .outerId(outerId)
+                        .topId(topId)
+                        .bottomId(bottomId)
+                        .highTemp(maxTemp)
+                        .lowTemp(minTemp)
+                        .userId(Integer.parseInt(userId))
+                        .build());
+            }
 
             return createSimpleTextResponse(Arrays.asList(number + "번 옷차림이 등록되었습니다."));
 
@@ -501,8 +519,8 @@ public class KaKaoService {
             if (noSpace.length() != 4)
                 return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
 
-            String date = noSpace.substring(0,2);
-            if (!date.equals("오늘") && !date.equals("어제") )
+            String date = noSpace.substring(0, 2);
+            if (!date.equals("오늘") && !date.equals("어제"))
                 return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
 
             String feedback = noSpace.substring(2, 4);
@@ -541,7 +559,7 @@ public class KaKaoService {
             // 입었던 날짜를 토대로 옷차림 가져옴
             int styleId = styleService.getStyleIdByWearAt(today);
 
-            switch(feedback) {
+            switch (feedback) {
                 case "더움":
                     styleService.updateTemperature(StyleFeedbackRequestDto.builder()
                             .styleId(styleId)
@@ -578,13 +596,13 @@ public class KaKaoService {
         }
     }
 
-    public void sendVerificationEmail(String email, String kakaoId) {
+    private void sendVerificationEmail(String email, String kakaoId) {
         String verification = emailService.sendVerificationEmail(email); // 입력받은 이메일로 인증 메일을 발송
         redisTemplate.opsForHash().put(kakaoId, "email", email); // key: kakaoId / value: verification, email
         redisTemplate.opsForHash().put(kakaoId, "verification", verification);
     }
 
-    public void updateKakaoId(String email, String kakaoId) {
+    private void updateKakaoId(String email, String kakaoId) {
         redisTemplate.opsForSet().add(USER_SET_KEY, kakaoId); // kakaoIds에 kakaoId 추가
 
         redisTemplate.delete(kakaoId); // kakaoId가 key인 인증 데이터 삭제
@@ -597,28 +615,28 @@ public class KaKaoService {
     }
 
     // 인증된 유저인지 확인
-    public boolean isUserAuthenticated(String kakaoId) {
+    private boolean isUserAuthenticated(String kakaoId) {
         return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(USER_SET_KEY, kakaoId));
     }
 
     // 인증번호 형식인지 확인
-    public boolean isAuthCode(String input) {
+    private boolean isAuthCode(String input) {
         // 인증번호는 4자리 숫자로만 구성된 문자열인지 확인
         return input != null && input.matches("\\d{4}");
     }
 
     // 이메일 형식인지 확인
-    public boolean isEmail(String input) {
+    private boolean isEmail(String input) {
         return Pattern.matches(EMAIL_REGEX, input);
     }
 
     // n번 형식인지 확인
-    public boolean isSelectNumber(String input) {
+    private boolean isSelectNumber(String input) {
         return Pattern.matches(SELECT_REGEX, input);
     }
 
     // 출력하고자 하는 문장을 simpleText 형식의 JSON 구조를 생성
-    public Map<String, Object> createSimpleTextResponse(List<String> messages) {
+    private Map<String, Object> createSimpleTextResponse(List<String> messages) {
         // JSON 응답 구조 생성
         Map<String, Object> response = new HashMap<>();
         response.put("version", "2.0");

@@ -47,6 +47,12 @@ public class Style {
     @Column(nullable = true) // 초기에는 피드백이 없을 수 있으므로 nullable 설정
     private Feedback feedback;
 
+    public void updateStyle(Cloth outer, Cloth top, Cloth bottom) {
+        this.outer = outer;
+        this.top = top;
+        this.bottom = bottom;
+    }
+
     @Builder
     public Style(User user, Cloth outer, Cloth top, Cloth bottom, int highTemp, int lowTemp, Feedback feedback) {
         this.user = user;
