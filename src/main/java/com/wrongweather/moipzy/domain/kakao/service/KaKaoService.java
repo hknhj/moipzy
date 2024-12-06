@@ -230,8 +230,8 @@ public class KaKaoService {
         String formattedTodayDate = today.format(formatter);
         String formattedTomorrowDate = tomorrow.format(formatter);
 
-        String todayTemperatureExplanation = "(" + formattedTodayDate + ")" + " 오늘의 기온은 최저 " + TodayMinTemp + "°C, 최고 " + TodayMaxTemp + "°C입니다.";
-        String tomorrowTemperatureExplanation = "(" + formattedTomorrowDate + ")" + " 내일의 기온은 최저 " + TomorrowMinTemp + "°C, 최고 " + TomorrowMaxTemp + "°C입니다.";
+        String todayTemperatureExplanation = "(" + formattedTodayDate + ")" + " 오늘의 기온은 \n최저 " + TodayMinTemp + "°C, 최고 " + TodayMaxTemp + "°C입니다.";
+        String tomorrowTemperatureExplanation = "(" + formattedTomorrowDate + ")" + " 내일의 기온은 \n최저 " + TomorrowMinTemp + "°C, 최고 " + TomorrowMaxTemp + "°C입니다.";
 
         return createSimpleTextResponse(Arrays.asList(todayTemperatureExplanation, tomorrowTemperatureExplanation));
     }
@@ -262,13 +262,13 @@ public class KaKaoService {
         if (todayEvent == null) {
             todayEventExplanation += "없음";
         } else {
-            todayEventExplanation += "\n" + todayEvent;
+            todayEventExplanation += "\n\n" + todayEvent;
         }
         String tomorrowEventExplanation = "(" + formattedTomorrowDate + ")" + " 내일 일정: ";
         if (tomorrowEvent == null) {
             tomorrowEventExplanation += "없음";
         } else {
-            tomorrowEventExplanation += "\n" + tomorrowEvent;
+            tomorrowEventExplanation += "\n\n" + tomorrowEvent;
         }
 
         return createSimpleTextResponse(Arrays.asList(todayEventExplanation, tomorrowEventExplanation));

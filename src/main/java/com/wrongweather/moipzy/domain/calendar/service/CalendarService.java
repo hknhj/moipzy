@@ -121,7 +121,7 @@ public class CalendarService {
                         eventDetails.append("- ").append(summary).append(" (")
                                 .append(startFormatted).append("~")
                                 .append(endFormatted).append(")")
-                                .append("\n\n");
+                                .append("\n");
                     }
                 }
                 //날짜와 summary 출력
