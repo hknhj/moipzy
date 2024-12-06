@@ -118,10 +118,9 @@ public class CalendarService {
                         String endFormatted = endDateTime.getHour() + "시 " + endDateTime.getMinute() + "분";
 
                         // 이벤트 상세 정보 추가
-                        eventDetails.append(summary).append(" (")
+                        eventDetails.append("- ").append(summary).append(" (")
                                 .append(startFormatted).append("~")
-                                .append(endFormatted).append(")")
-                                .append("; ");
+                                .append(endFormatted).append(")");
                     }
                 }
                 //날짜와 summary 출력
