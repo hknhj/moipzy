@@ -137,6 +137,13 @@ public class KakakoController {
         return kaKaoService.fallbackBlock(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
     }
 
+    @PostMapping("/outfit")
+    public Map<String, Object> getOutfit(@RequestBody Map<String, Object> requestBody) {
+        log.info("getFeedback requested");
+        List<String> utterandAndKakaoId = getUtteranceAndKakaoId(requestBody);
+        return kaKaoService.getOutfit(utterandAndKakaoId.get(0), utterandAndKakaoId.get(1));
+    }
+
     // requestBody에서 utterance, userId 추출
     List<String> getUtteranceAndKakaoId(Map<String, Object> requestBody) {
         JSONObject jsonObject = new JSONObject(requestBody);
