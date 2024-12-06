@@ -118,9 +118,9 @@ public class CalendarService {
                         String endFormatted = endDateTime.getHour() + "시 " + endDateTime.getMinute() + "분";
 
                         // 이벤트 상세 정보 추가
-                        eventDetails.append("Summary: ").append(summary)
-                                .append(", Start: ").append(startFormatted)
-                                .append(", End: ").append(endFormatted)
+                        eventDetails.append(summary).append(" (")
+                                .append(startFormatted).append("~")
+                                .append(endFormatted).append(")")
                                 .append("; ");
                     }
                 }
@@ -128,7 +128,8 @@ public class CalendarService {
                 if (eventDetails.length() > 0) {
                     // 마지막 쉼표 제거
                     eventDetails.setLength(eventDetails.length() - 2);
-                    result += "Date: " + date + " - " + eventDetails.toString() + "\n";
+                    result += eventDetails.toString();
+                    //result += "Date: " + date + " - " + eventDetails.toString() + "\n";
                 }
             }
 

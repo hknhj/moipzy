@@ -262,13 +262,13 @@ public class KaKaoService {
         if (todayEvent == null) {
             todayEventExplanation += "없음";
         } else {
-            todayEventExplanation += todayEvent;
+            todayEventExplanation += "\n" + todayEvent;
         }
         String tomorrowEventExplanation = "(" + formattedTomorrowDate + ")" + " 내일 일정: ";
         if (tomorrowEvent == null) {
             tomorrowEventExplanation += "없음";
         } else {
-            tomorrowEventExplanation += tomorrowEvent;
+            tomorrowEventExplanation += "\n" + tomorrowEvent;
         }
 
         return createSimpleTextResponse(Arrays.asList(todayEventExplanation, tomorrowEventExplanation));
