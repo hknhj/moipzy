@@ -190,6 +190,7 @@ public class StyleService {
                 .outer(outer)
                 .top(top)
                 .bottom(bottom)
+                .wearAt(styleUploadRequestDto.getWearAt())
                 .highTemp(styleUploadRequestDto.getHighTemp())
                 .lowTemp(styleUploadRequestDto.getLowTemp())
                 .build())
@@ -312,9 +313,4 @@ public class StyleService {
 
         return styleRepository.save(style).getStyleId();
     }
-
-    public int getStyleIdByWearAt(LocalDate date) {
-        return styleRepository.findByWearAt(date).get().getStyleId();
-    }
-
 }
