@@ -127,7 +127,7 @@ public class CalendarService {
                 //날짜와 summary 출력
                 if (eventDetails.length() > 0) {
                     // 마지막 쉼표 제거
-                    eventDetails.setLength(eventDetails.length() - 2);
+                    eventDetails.setLength(eventDetails.length() - 1);
                     result += eventDetails.toString();
                     //result += "Date: " + date + " - " + eventDetails.toString() + "\n";
                 }
