@@ -19,7 +19,7 @@ public class KakakoController {
     @PostMapping("/recommend")
     public Map<String, Object> recommend(@RequestBody Map<String, Object> requestBody) {
         List<String> utteranceAndKakaoId = getUtteranceAndKakaoId(requestBody);
-        log.info("kakaoId: " + utteranceAndKakaoId.get(0) + " recommed requested");
+        log.info("kakaoId: " + utteranceAndKakaoId.get(1) + " recommed requested");
         return kaKaoService.getStyleRecommends(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
     }
 
@@ -40,14 +40,14 @@ public class KakakoController {
     @PostMapping("/fallback")
     public Map<String, Object> getFallback(@RequestBody Map<String, Object> requestBody) {
         List<String> utteranceAndKakaoId = getUtteranceAndKakaoId(requestBody);
-        log.info("kakaoId: "+ utteranceAndKakaoId.get(0) + " fallback requested");
+        log.info("kakaoId: "+ utteranceAndKakaoId.get(1) + " fallback requested");
         return kaKaoService.fallbackBlock(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
     }
 
     @PostMapping("/outfit")
     public Map<String, Object> getOutfit(@RequestBody Map<String, Object> requestBody) {
         List<String> utterandAndKakaoId = getUtteranceAndKakaoId(requestBody);
-        log.info("kakaoId: " + utterandAndKakaoId.get(0) + " getOutfit requested");
+        log.info("kakaoId: " + utterandAndKakaoId.get(1) + " getOutfit requested");
         return kaKaoService.getOutfit(utterandAndKakaoId.get(0), utterandAndKakaoId.get(1));
     }
 

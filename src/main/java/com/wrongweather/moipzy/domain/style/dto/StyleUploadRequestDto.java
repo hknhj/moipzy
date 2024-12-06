@@ -6,6 +6,8 @@ import com.wrongweather.moipzy.domain.users.User;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 @Getter
 @Builder
 public class StyleUploadRequestDto {
@@ -15,6 +17,7 @@ public class StyleUploadRequestDto {
     private Integer bottomId;
     private Integer highTemp;
     private Integer lowTemp;
+    private LocalDate wearAt;
 
     public Style toEntity(User user, Cloth outer, Cloth top, Cloth bottom, int highTemp, int lowTemp) {
         return Style.builder()

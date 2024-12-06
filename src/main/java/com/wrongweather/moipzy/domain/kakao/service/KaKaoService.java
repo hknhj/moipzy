@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
@@ -414,7 +413,7 @@ public class KaKaoService {
             String email = utterance;
 
             if (!userService.isRegistered(email))
-                return createSimpleTextResponse(Arrays.asList("등록되지 않은 이메일입니다."));
+                return createSimpleTextResponse(Arrays.asList("서비스에 등록되어있지 않은 이메일입니다."));
 
             sendVerificationEmail(email, kakaoId);
 
@@ -483,7 +482,7 @@ public class KaKaoService {
                 bottomId = Integer.parseInt(idArray[1]);
             }
 
-            // redis에 17,18,19 형식으로 kakaoId.24-12-04Style 로 저장
+            // redis에 17,18,19 형식으로 kakaoId.24-12-04Style 에 저장
             redisTemplate.opsForHash().delete(kakaoId, date + "Style");
             redisTemplate.opsForHash().put(kakaoId, date + "Style", result);
 
@@ -491,6 +490,7 @@ public class KaKaoService {
             // style을 조회해서, 존재하면 수정, 없으면 추가
             Optional<Style> existingStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), styleDate);
             if (existingStyle.isPresent()) {
+                log.info("userId: {}, style isPresent", userId);
                 Style style = existingStyle.get();
 
                 Cloth outer = clothRepository.findByClothId(outerId).orElseGet(null);
@@ -500,10 +500,12 @@ public class KaKaoService {
                 style.updateStyle(outer, top, bottom);
                 styleRepository.save(style);
             } else {
+                log.info("userId: {}, style is not Present", userId);
                 styleService.uploadStyle(StyleUploadRequestDto.builder()
                         .outerId(outerId)
                         .topId(topId)
                         .bottomId(bottomId)
+                        .wearAt(styleDate)
                         .highTemp(maxTemp)
                         .lowTemp(minTemp)
                         .userId(Integer.parseInt(userId))
@@ -513,6 +515,8 @@ public class KaKaoService {
             return createSimpleTextResponse(Arrays.asList(number + "번 옷차림이 등록되었습니다."));
 
         } else if (utterance.contains("더움") || utterance.contains("만족") || utterance.contains("추움")) { // 옷차림 보여주고 (오늘/내일)+(더움/만족/추움) quickReplies 사용
+
+            String userId = (String) redisTemplate.opsForHash().get(kakaoId, "userId");
 
             String noSpace = utterance.replaceAll(" ", "");
 
@@ -530,6 +534,7 @@ public class KaKaoService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String formattedTodayDate = today.format(formatter);
             String formattedYesterdayDate = yesterday.format(formatter);
+            LocalDate styleDate = LocalDate.now();
 
             String style = "";
             int outerId = 0;
@@ -538,11 +543,13 @@ public class KaKaoService {
 
             if (date.equals("오늘")) {
                 style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Style");
+                styleDate = today;
             } else if (date.equals("어제")) {
                 style = (String) redisTemplate.opsForHash().get(kakaoId, formattedYesterdayDate + "Style");
+                styleDate = yesterday;
             }
 
-            if (style.equals(""))
+            if (style.isEmpty())
                 return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
 
             String[] idArray = style.split(",");
@@ -557,38 +564,48 @@ public class KaKaoService {
             }
 
             // 입었던 날짜를 토대로 옷차림 가져옴
-            int styleId = styleService.getStyleIdByWearAt(today);
 
-            switch (feedback) {
-                case "더움":
-                    styleService.updateTemperature(StyleFeedbackRequestDto.builder()
-                            .styleId(styleId)
-                            .outerId(outerId)
-                            .topId(topId)
-                            .bottomId(bottomId)
-                            .feedback(Feedback.HOT)
-                            .build());
-                    return createSimpleTextResponse(Arrays.asList("피드백이 적용 됐습니다."));
-                case "만족":
-                    styleService.updateTemperature(StyleFeedbackRequestDto.builder()
-                            .styleId(styleId)
-                            .outerId(outerId)
-                            .topId(topId)
-                            .bottomId(bottomId)
-                            .feedback(Feedback.GOOD)
-                            .build());
-                    return createSimpleTextResponse(Arrays.asList("피드백이 적용 됐습니다."));
-                case "추움":
-                    styleService.updateTemperature(StyleFeedbackRequestDto.builder()
-                            .styleId(styleId)
-                            .outerId(outerId)
-                            .topId(topId)
-                            .bottomId(bottomId)
-                            .feedback(Feedback.COLD)
-                            .build());
-                    return createSimpleTextResponse(Arrays.asList("피드백이 적용 됐습니다."));
-                default:
-                    return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
+            Optional<Style> foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), styleDate);
+            if (foundStyle.isEmpty()) {
+                return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
+            } else {
+                int styleId = foundStyle.get().getStyleId();
+
+                if (foundStyle.get().getFeedback()==null) {
+                    switch (feedback) {
+                        case "더움":
+                            styleService.updateTemperature(StyleFeedbackRequestDto.builder()
+                                    .styleId(styleId)
+                                    .outerId(outerId)
+                                    .topId(topId)
+                                    .bottomId(bottomId)
+                                    .feedback(Feedback.HOT)
+                                    .build());
+                            return createSimpleTextResponse(Arrays.asList("피드백이 적용 됐습니다."));
+                        case "만족":
+                            styleService.updateTemperature(StyleFeedbackRequestDto.builder()
+                                    .styleId(styleId)
+                                    .outerId(outerId)
+                                    .topId(topId)
+                                    .bottomId(bottomId)
+                                    .feedback(Feedback.GOOD)
+                                    .build());
+                            return createSimpleTextResponse(Arrays.asList("피드백이 적용 됐습니다."));
+                        case "추움":
+                            styleService.updateTemperature(StyleFeedbackRequestDto.builder()
+                                    .styleId(styleId)
+                                    .outerId(outerId)
+                                    .topId(topId)
+                                    .bottomId(bottomId)
+                                    .feedback(Feedback.COLD)
+                                    .build());
+                            return createSimpleTextResponse(Arrays.asList("피드백이 적용 됐습니다."));
+                        default:
+                            return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
+                    }
+                } else {
+                    return createSimpleTextResponse(Arrays.asList("이미 피드백이 완료됐습니다."));
+                }
             }
 
         } else {

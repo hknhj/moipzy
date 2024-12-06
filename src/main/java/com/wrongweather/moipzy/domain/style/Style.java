@@ -54,12 +54,12 @@ public class Style {
     }
 
     @Builder
-    public Style(User user, Cloth outer, Cloth top, Cloth bottom, int highTemp, int lowTemp, Feedback feedback) {
+    public Style(User user, Cloth outer, Cloth top, Cloth bottom, LocalDate wearAt, int highTemp, int lowTemp, Feedback feedback) {
         this.user = user;
         this.outer = outer;
         this.top = top;
         this.bottom = bottom;
-        this.wearAt = LocalDate.now();
+        this.wearAt = wearAt;
         this.highTemp = highTemp;
         this.lowTemp = lowTemp;
         this.feedback = feedback;
