@@ -294,12 +294,22 @@ public class KaKaoService {
             minTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMinTemp"));
             maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMaxTemp"));
             event = (String) redisTemplate.opsForHash().get(kakaoId, "today");
-            information = "(" + formattedTodayDate + ")\n" + "- 최저기온 " + minTemp + "°C, 최고기온 " + maxTemp + "°C" + "\n\n" + event;
+            information = "(" + formattedTodayDate + ")\n" + "- 최저기온 " + minTemp + "°C, 최고기온 " + maxTemp + "°C" + "\n\n";
+            if (event == null) {
+                information += "- 일정 없음";
+            } else {
+                information += event;
+            }
         } else if (utterance.equals("내일 정보")) {
             minTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMinTemp"));
             maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMaxTemp"));
             event = (String) redisTemplate.opsForHash().get(kakaoId, "tomorrow");
-            information = "(" + formattedTomorrowDate + ")\n" + "- 최저기온 " + minTemp + "°C, 최고 " + maxTemp + "°C" + "\n\n" + event;
+            information = "(" + formattedTomorrowDate + ")\n" + "- 최저기온 " + minTemp + "°C, 최고 " + maxTemp + "°C" + "\n\n";
+            if (event == null) {
+                information += "- 일정 없음";
+            } else {
+                information += event;
+            }
         }
         return createSimpleTextResponse(Arrays.asList(information));
     }
