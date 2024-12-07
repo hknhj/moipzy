@@ -296,21 +296,21 @@ public class KaKaoService {
             minTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMinTemp"));
             maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMaxTemp"));
             event = (String) redisTemplate.opsForHash().get(userId, "today");
-            information = "(" + formattedTodayDate + ")\n\n" + "- 최저기온 " + minTemp + "°C, 최고기온 " + maxTemp + "°C" + "\n\n";
+            information = "(" + formattedTodayDate + ")\n\n" + "(기온)\n- 최저기온 " + minTemp + "°C, 최고기온 " + maxTemp + "°C" + "\n\n";
             if (event == null) {
                 information += "- 일정 없음";
             } else {
-                information += event;
+                information += "(일정)\n" + event;
             }
         } else if (utterance.equals("내일 정보")) {
             minTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMinTemp"));
             maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMaxTemp"));
             event = (String) redisTemplate.opsForHash().get(userId, "tomorrow");
-            information = "(" + formattedTomorrowDate + ")\n\n" + "- 최저기온 " + minTemp + "°C, 최고 " + maxTemp + "°C" + "\n\n";
+            information = "(" + formattedTomorrowDate + ")\n\n" + "(기온)\n- 최저기온 " + minTemp + "°C, 최고 " + maxTemp + "°C" + "\n\n";
             if (event == null) {
                 information += "- 일정 없음";
             } else {
-                information += event;
+                information += "(일정)\n" + event;
             }
         }
         return createSimpleTextResponse(Arrays.asList(information));
