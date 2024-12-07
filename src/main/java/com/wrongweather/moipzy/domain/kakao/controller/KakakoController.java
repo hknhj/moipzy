@@ -37,10 +37,17 @@ public class KakakoController {
         return kaKaoService.getEvents(userId);
     }
 
+    @PostMapping("/information")
+    public Map<String, Object> getInformation(@RequestBody Map<String, Object> requestBody) {
+        List<String> utteranceAndKakaoId = getUtteranceAndKakaoId(requestBody);
+        log.info("kakaoId: " + utteranceAndKakaoId.get(1) + " getInformation requested");
+        return kaKaoService.getInformation(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
+    }
+
     @PostMapping("/fallback")
     public Map<String, Object> getFallback(@RequestBody Map<String, Object> requestBody) {
         List<String> utteranceAndKakaoId = getUtteranceAndKakaoId(requestBody);
-        log.info("kakaoId: "+ utteranceAndKakaoId.get(1) + " fallback requested");
+        log.info("kakaoId: " + utteranceAndKakaoId.get(1) + " fallback requested");
         return kaKaoService.fallbackBlock(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
     }
 

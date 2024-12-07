@@ -211,8 +211,8 @@ public class KaKaoService {
         return response;
     }
 
-    public Map<String, Object> getWeather(String userId) {
-        if (!isUserAuthenticated(userId))
+    public Map<String, Object> getWeather(String kakaoId) {
+        if (!isUserAuthenticated(kakaoId))
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
@@ -272,6 +272,36 @@ public class KaKaoService {
         }
 
         return createSimpleTextResponse(Arrays.asList(todayEventExplanation, tomorrowEventExplanation));
+    }
+
+    public Map<String, Object> getInformation(String utterance, String kakaoId) {
+        if (!isUserAuthenticated(kakaoId))
+            return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
+
+        int minTemp = -100;
+        int maxTemp = 100;
+        String event = "";
+        String information = "";
+
+        // 오늘, 내일 날짜 설정
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedTodayDate = today.format(formatter);
+        String formattedTomorrowDate = tomorrow.format(formatter);
+
+        if (utterance.equals("오늘 정보")) {
+            minTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMinTemp"));
+            maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMaxTemp"));
+            event = (String) redisTemplate.opsForHash().get(kakaoId, "today");
+            information = "(" + formattedTodayDate + ")\n" + "- 최저기온 " + minTemp + "°C, 최고기온 " + maxTemp + "°C" + "\n\n" + event;
+        } else if (utterance.equals("내일 정보")) {
+            minTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMinTemp"));
+            maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMaxTemp"));
+            event = (String) redisTemplate.opsForHash().get(kakaoId, "tomorrow");
+            information = "(" + formattedTomorrowDate + ")\n" + "- 최저기온 " + minTemp + "°C, 최고 " + maxTemp + "°C" + "\n\n" + event;
+        }
+        return createSimpleTextResponse(Arrays.asList(information));
     }
 
     public Map<String, Object> getOutfit(String utterance, String kakaoId) {
