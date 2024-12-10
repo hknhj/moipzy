@@ -66,7 +66,7 @@ public class ChatGPTService {
                                       - A comfortable outfit (e.g., sweatpants with a hoodie or sweatshirt).
                                       - Do not recommend knit/hoodie/sweatshirt with cardigan, denim_jacket, blouson, blazer, hooded jackets.
                                       - Whenever possible, recommend clothes that haven't been worn recently.
-                                      - Recommend outer when lowTemp is under 12°C
+                                      - Outer is mandatory when lowTemp is under 12°C
                                  3. **Schedule Rules**:
                                     - Prioritize events with higher formality or importance.
                                     - For formal events (e.g., meetings, weddings, funerals):
