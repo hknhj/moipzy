@@ -51,6 +51,142 @@ public class KaKaoService {
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
     // n번 유효성 검사 정규식
     private static final String SELECT_REGEX = "^(오늘|내일)\\s*+(\\d+)번$";
+    // img url
+    private static final String IMG_URL = "https://moipzy.shop";
+
+    public Map<String, Object> getStyleRecommendsInRedis(String utterance, String kakaoId) {
+        if (!isUserAuthenticated(kakaoId))
+            return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
+
+        // 오늘, 내일 날짜 설정
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedTodayDate = today.format(formatter);
+        String formattedTomorrowDate = tomorrow.format(formatter);
+
+        String koreanDate = "";
+
+        List<String> clothIds = new ArrayList<>();
+
+        if (utterance.equals("오늘 옷 추천하기")) {
+            for (int i=1; i<+3; i++)
+                clothIds.add((String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Recommend" + i));
+            koreanDate = "오늘";
+        } else if (utterance.equals("내일 옷 추천하기")) {
+            for (int i=1; i<+3; i++)
+                clothIds.add((String) redisTemplate.opsForHash().get(kakaoId, formattedTomorrowDate + "Recommend" + i));
+            koreanDate = "내일";
+        }
+
+        // JSON 응답 구조 생성
+        Map<String, Object> response = new HashMap<>();
+        response.put("version", "2.0");
+
+        // 템플릿 설정
+        Map<String, Object> template = new HashMap<>();
+        List<Map<String, Object>> outputs = new ArrayList<>();
+
+        for (String clothId : clothIds) {
+            // 문자열을 쉼표로 분리
+            String[] stringNumbers = clothId.split(",");
+
+            int[] numbers = Arrays.stream(stringNumbers)
+                    .mapToInt(Integer::parseInt)
+                    .toArray();
+
+            // Cloth 객체 초기화
+            Cloth outer = null;
+            Cloth top = null;
+            Cloth bottom = null;
+
+            // 정수 배열의 길이에 따라 처리
+            if (numbers.length == 3) {
+                // 아우터, 상의, 하의 모두 있는 경우
+                outer = clothRepository.findByClothId(numbers[0]).orElse(null);
+                top = clothRepository.findByClothId(numbers[1]).orElse(null);
+                bottom = clothRepository.findByClothId(numbers[2]).orElse(null);
+            } else if (numbers.length == 2) {
+                // 상의와 하의만 있는 경우
+                top = clothRepository.findByClothId(numbers[0]).orElse(null);
+                bottom = clothRepository.findByClothId(numbers[1]).orElse(null);
+            } else {
+                throw new IllegalArgumentException("Invalid number of clothing IDs provided.");
+            }
+
+            // 카로셀 아이템들 생성
+            Map<String, Object> carousel = new HashMap<>();
+            carousel.put("type", "basicCard");
+
+            // 카로셀 아이템 목록
+            List<Map<String, Object>> items = new ArrayList<>();
+
+            // 아우터 아이템
+            if (outer != null) {
+                Map<String, Object> outerItem = new HashMap<>();
+                outerItem.put("title", "아우터");
+                Color outerColor = outer.getColor();
+                SmallCategory outerSmallCategory = outer.getSmallCategory();
+                String outerDescription = outerColor.name() + " " + outerSmallCategory.name();
+                outerItem.put("description", outerDescription);
+                Map<String, Object> outerThumbnail = new HashMap<>();
+                outerThumbnail.put("imageUrl", IMG_URL + outer.getClothImg().getImgUrl());
+                outerThumbnail.put("fixedRatio", true);
+                outerItem.put("thumbnail", outerThumbnail);
+                items.add(outerItem);
+            }
+
+            // 상의 아이템
+            if (top == null)
+                break;
+            Map<String, Object> topItem = new HashMap<>();
+            topItem.put("title", "상의");
+            Color topColor = top.getColor();
+            SmallCategory topSmallCategory = top.getSmallCategory();
+            String topDescription = topColor.name() + " " + topSmallCategory.name();
+            topItem.put("description", topDescription);
+            Map<String, Object> topThumbnail = new HashMap<>();
+            topThumbnail.put("imageUrl", IMG_URL + top.getClothImg().getImgUrl());
+            topThumbnail.put("fixedRatio", true);
+            topItem.put("thumbnail", topThumbnail);
+            items.add(topItem);
+
+            // 하의 아이템
+            if (bottom == null)
+                break;
+            Map<String, Object> bottomItem = new HashMap<>();
+            bottomItem.put("title", "하의");
+            Color bottomColor = bottom.getColor();
+            SmallCategory bottomSmallCategory = bottom.getSmallCategory();
+            String bottomDescription = bottomColor.name() + " " + bottomSmallCategory.name();
+            bottomItem.put("description", bottomDescription);
+            Map<String, Object> bottomThumbnail = new HashMap<>();
+            bottomThumbnail.put("imageUrl", IMG_URL + bottom.getClothImg().getImgUrl());
+            bottomThumbnail.put("fixedRatio", true);
+            bottomItem.put("thumbnail", bottomThumbnail);
+            items.add(bottomItem);
+
+            carousel.put("items", items);
+            outputs.add(Map.of("carousel", carousel));
+        }
+
+        //quickReplies
+        List<Map<String, Object>> quickReplies = new ArrayList<>();
+        for (int i = 0; i < clothIds.size(); i++) {
+            Map<String, Object> quickReply = new HashMap<>();
+            quickReply.put("messageText", koreanDate + " " + (i + 1) + "번"); //오늘 1번
+            quickReply.put("action", "message");
+            quickReply.put("label", (i + 1) + "번");
+            quickReplies.add(quickReply);
+        }
+
+        template.put("outputs", outputs);
+        template.put("quickReplies", quickReplies);
+
+        response.put("template", template);
+
+        return response;
+    }
 
     public Map<String, Object> getStyleRecommends(String utterance, String kakaoId) {
         if (!isUserAuthenticated(kakaoId))

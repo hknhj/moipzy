@@ -20,7 +20,7 @@ public class KakakoController {
     public Map<String, Object> recommend(@RequestBody Map<String, Object> requestBody) {
         List<String> utteranceAndKakaoId = getUtteranceAndKakaoId(requestBody);
         log.info("kakaoId: " + utteranceAndKakaoId.get(1) + " recommed requested");
-        return kaKaoService.getStyleRecommends(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
+        return kaKaoService.getStyleRecommendsInRedis(utteranceAndKakaoId.get(0), utteranceAndKakaoId.get(1));
     }
 
     @PostMapping("/weather")

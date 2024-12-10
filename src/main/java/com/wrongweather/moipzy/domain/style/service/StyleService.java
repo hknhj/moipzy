@@ -14,6 +14,7 @@ import com.wrongweather.moipzy.domain.users.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,7 @@ public class StyleService {
     private final StyleRepository styleRepository;
     private final UserRepository userRepository;
     private final ChatGPTService chatGPTService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     private final int INF_HIGH_TEMPERATURE = 70;
     private final int INF_LOW_TEMPERATURE = -70;
@@ -125,6 +127,49 @@ public class StyleService {
                     .build());
         }
         return recommends;
+    }
+
+    public void getAllStyles() {
+        log.info("gellAllStyles");
+        List<Object[]> results = userRepository.findUserAndKakaoIdForAllWithKakaoId();
+
+        // 오늘, 내일 날짜 설정
+        LocalDate today = LocalDate.now();
+        LocalDate tomorrow = today.plusDays(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedTodayDate = today.format(formatter);
+        String formattedTomorrowDate = tomorrow.format(formatter);
+
+        int todayLowTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMinTemp"));
+        int todayHighTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMaxTemp"));
+        int tomorrowLowTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMinTemp"));
+        int tomorrowHighTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMaxTemp"));
+
+        for (Object[] result : results) {
+            int userId = (int) result[0]; // 수정: 캐스팅을 int로 변경
+            String kakaoId = (String) result[1];
+
+            String todayEvent = (String) redisTemplate.opsForHash().get(Integer.toString(userId), "today");
+            String tomorrowEvent = (String) redisTemplate.opsForHash().get(Integer.toString(userId), "tomorrow");
+
+            int i = 1;
+            List<StyleRecommendResponseDto> todayRecommends = recommend(userId, todayHighTemp, todayLowTemp, todayEvent);
+            for (StyleRecommendResponseDto todayRecommend : todayRecommends) {
+                String clothId = todayRecommend.getOuterId() + "," + todayRecommend.getTopId() + "," + todayRecommend.getBottomId();
+                redisTemplate.opsForHash().put(kakaoId, formattedTodayDate + "Recommend" + i, clothId);
+                log.info("kakaoId: {}, todayRecommend{} : {}", kakaoId, i, clothId);
+                i++;
+            }
+
+            i = 1;
+            List<StyleRecommendResponseDto> tomorrowRecommends = recommend(userId, tomorrowHighTemp, tomorrowLowTemp, tomorrowEvent);
+            for (StyleRecommendResponseDto tomorrowRecommend : tomorrowRecommends) {
+                String clothId = tomorrowRecommend.getOuterId() + "," + tomorrowRecommend.getTopId() + "," + tomorrowRecommend.getBottomId();
+                redisTemplate.opsForHash().put(kakaoId, formattedTomorrowDate + "Recommend" + i, clothId);
+                log.info("kakaoId: {}, tomorrowRecommend{} : {}", kakaoId, i, clothId);
+                i++;
+            }
+        }
     }
 
     public List<StyleRecommendResponseDto> recommend(int userId, int highTemp, int lowTemp, String events) {

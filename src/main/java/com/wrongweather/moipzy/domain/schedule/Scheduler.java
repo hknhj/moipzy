@@ -1,6 +1,7 @@
 package com.wrongweather.moipzy.domain.schedule;
 
 import com.wrongweather.moipzy.domain.calendar.service.CalendarService;
+import com.wrongweather.moipzy.domain.style.service.StyleService;
 import com.wrongweather.moipzy.domain.token.service.TokenService;
 import com.wrongweather.moipzy.domain.users.service.UserService;
 import com.wrongweather.moipzy.domain.weather.service.WeatherService;
@@ -18,6 +19,7 @@ public class Scheduler {
     private final CalendarService calendarService;
     private final UserService userService;
     private final WeatherService weatherService;
+    private final StyleService styleService;
 
     @PostConstruct
     public void init() {
@@ -25,6 +27,7 @@ public class Scheduler {
         calendarService.getAllEvents();
         userService.getAllKakaoId();
         weatherService.getWeather();
+        styleService.getAllStyles();
     }
 
     // 매일 01:00 일정 업데이트
