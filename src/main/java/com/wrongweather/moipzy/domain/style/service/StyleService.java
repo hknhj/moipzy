@@ -13,6 +13,7 @@ import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StyleService {
 
     private final ClothRepository clothRepository;
@@ -135,6 +137,9 @@ public class StyleService {
         List<Cloth> outer = clothRepository.findByLargeCategoryAndTemperatureInRangeAndUserId(LargeCategory.OUTER, lowTemp, userId); //조회 결과가 없으면 빈 리스트를 반환한다. null 아님.
         List<Cloth> top = clothRepository.findByLargeCategoryAndTemperatureInRangeAndUserId(LargeCategory.TOP, highTemp, userId);
         List<Cloth> bottom = clothRepository.findByLargeCategoryAndTemperatureInRangeAndUserId(LargeCategory.BOTTOM, (highTemp+lowTemp)/2, userId);
+
+        log.info("outerList: {}", outer);
+
         List<List<Cloth>> clothList = Arrays.asList(outer, top, bottom);
 
         // 모든 옷을 toString 메서드를 사용해 옷의 정보를 prompt에 넣는다.

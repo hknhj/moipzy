@@ -310,6 +310,4 @@ public class ClothService {
         }
         return tempList;
     }
-
-
 }
