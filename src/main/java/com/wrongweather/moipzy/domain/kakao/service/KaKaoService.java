@@ -70,11 +70,11 @@ public class KaKaoService {
         List<String> clothIds = new ArrayList<>();
 
         if (utterance.equals("오늘 옷 추천하기")) {
-            for (int i=1; i<+3; i++)
+            for (int i=1; i<=3; i++)
                 clothIds.add((String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Recommend" + i));
             koreanDate = "오늘";
         } else if (utterance.equals("내일 옷 추천하기")) {
-            for (int i=1; i<+3; i++)
+            for (int i=1; i<=3; i++)
                 clothIds.add((String) redisTemplate.opsForHash().get(kakaoId, formattedTomorrowDate + "Recommend" + i));
             koreanDate = "내일";
         }
