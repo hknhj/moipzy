@@ -466,20 +466,20 @@ public class KaKaoService {
 
         if (utterance.equals("오늘 옷차림")) {
             //style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Style");
-            foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), today).orElseGet(null);
+            foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), today).orElse(null);
             koreanDate = "오늘";
         } else if (utterance.equals("어제 옷차림")) {
             //style = (String) redisTemplate.opsForHash().get(kakaoId, formattedYesterdayDate + "Style");
-            foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), yesterday).orElseGet(null);
+            foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), yesterday).orElse(null);
             koreanDate = "어제";
         }
 
         if (foundStyle == null)
             return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
 
-        Cloth outer = clothRepository.findByClothId(foundStyle.getOuter().getClothId()).orElseGet(null);
-        Cloth top = clothRepository.findByClothId(foundStyle.getTop().getClothId()).orElseGet(null);
-        Cloth bottom = clothRepository.findByClothId(foundStyle.getBottom().getClothId()).orElseGet(null);
+        Cloth outer = clothRepository.findByClothId(foundStyle.getOuter().getClothId()).orElse(null);
+        Cloth top = clothRepository.findByClothId(foundStyle.getTop().getClothId()).orElse(null);
+        Cloth bottom = clothRepository.findByClothId(foundStyle.getBottom().getClothId()).orElse(null);
 
         // JSON 응답 구조 생성
         Map<String, Object> response = new HashMap<>();
@@ -657,9 +657,9 @@ public class KaKaoService {
 
                 Style style = existingStyle.get();
 
-                Cloth outer = clothRepository.findByClothId(style.getOuter().getClothId()).orElseGet(null);
-                Cloth top = clothRepository.findByClothId(style.getTop().getClothId()).orElseGet(null);
-                Cloth bottom = clothRepository.findByClothId(style.getBottom().getClothId()).orElseGet(null);
+                Cloth outer = clothRepository.findByClothId(style.getOuter().getClothId()).orElse(null);
+                Cloth top = clothRepository.findByClothId(style.getTop().getClothId()).orElse(null);
+                Cloth bottom = clothRepository.findByClothId(style.getBottom().getClothId()).orElse(null);
 
                 style.updateStyle(outer, top, bottom);
                 styleRepository.save(style);
