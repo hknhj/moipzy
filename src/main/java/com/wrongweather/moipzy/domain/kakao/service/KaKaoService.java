@@ -456,44 +456,30 @@ public class KaKaoService {
         if (!isUserAuthenticated(kakaoId))
             return createSimpleTextResponse(Arrays.asList("등록되지 않은 유저입니다."));
 
+        String userId = (String) redisTemplate.opsForHash().get(kakaoId, "userId");
+
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        String formattedTodayDate = today.format(formatter);
-        String formattedYesterdayDate = yesterday.format(formatter);
         String koreanDate = "";
 
-        String style = "";
+        Style foundStyle = null;
 
         if (utterance.equals("오늘 옷차림")) {
-            style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Style");
+            //style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Style");
+            foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), today).orElseGet(null);
             koreanDate = "오늘";
         } else if (utterance.equals("어제 옷차림")) {
-            style = (String) redisTemplate.opsForHash().get(kakaoId, formattedYesterdayDate + "Style");
+            //style = (String) redisTemplate.opsForHash().get(kakaoId, formattedYesterdayDate + "Style");
+            foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), yesterday).orElseGet(null);
             koreanDate = "어제";
         }
 
-        if (style == null || style.isEmpty())
+        if (foundStyle == null)
             return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
 
-
-        String[] idArray = style.split(",");
-        int outerId = 0;
-        int topId = 0;
-        int bottomId = 0;
-
-        if (idArray.length == 3) {
-            outerId = Integer.parseInt(idArray[0]);
-            topId = Integer.parseInt(idArray[1]);
-            bottomId = Integer.parseInt(idArray[2]);
-        } else if (idArray.length == 2) {
-            topId = Integer.parseInt(idArray[0]);
-            bottomId = Integer.parseInt(idArray[1]);
-        }
-
-        Cloth outer = clothRepository.findByClothId(outerId).get();
-        Cloth top = clothRepository.findByClothId(topId).get();
-        Cloth bottom = clothRepository.findByClothId(bottomId).get();
+        Cloth outer = clothRepository.findByClothId(foundStyle.getOuter().getClothId()).orElseGet(null);
+        Cloth top = clothRepository.findByClothId(foundStyle.getTop().getClothId()).orElseGet(null);
+        Cloth bottom = clothRepository.findByClothId(foundStyle.getBottom().getClothId()).orElseGet(null);
 
         // JSON 응답 구조 생성
         Map<String, Object> response = new HashMap<>();
@@ -514,7 +500,7 @@ public class KaKaoService {
         String fullurl = "https://moipzy.shop";
 
         // 아우터 아이템
-        if (Integer.parseInt(idArray[0]) != 0) {
+        if (outer != null) {
             Map<String, Object> outerItem = new HashMap<>();
             outerItem.put("title", "아우터");
             Color outerColor = outer.getColor();
@@ -529,7 +515,7 @@ public class KaKaoService {
         }
 
         // 상의 아이템
-        if (Integer.parseInt(idArray[1]) != 0) {
+        if (top != null) {
             Map<String, Object> topItem = new HashMap<>();
             topItem.put("title", "상의");
             Color topColor = top.getColor();
@@ -544,7 +530,7 @@ public class KaKaoService {
         }
 
         // 하의 아이템
-        if (Integer.parseInt(idArray[2]) != 0) {
+        if (bottom != null) {
             Map<String, Object> bottomItem = new HashMap<>();
             bottomItem.put("title", "하의");
             Color bottomColor = bottom.getColor();
@@ -663,25 +649,22 @@ public class KaKaoService {
                 bottomId = Integer.parseInt(idArray[1]);
             }
 
-            // redis에 17,18,19 형식으로 kakaoId.24-12-04Style 에 저장
-            redisTemplate.opsForHash().delete(kakaoId, date + "Style");
-            redisTemplate.opsForHash().put(kakaoId, date + "Style", result);
-
             // 옷차림 db에 저장
             // style을 조회해서, 존재하면 수정, 없으면 추가
             Optional<Style> existingStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), styleDate);
             if (existingStyle.isPresent()) {
-                log.info("userId: {}, style isPresent", userId);
+                log.info("userId: {}, wearAt: {}, style isPresent", userId, formattedTodayDate);
+
                 Style style = existingStyle.get();
 
-                Cloth outer = clothRepository.findByClothId(outerId).orElseGet(null);
-                Cloth top = clothRepository.findByClothId(topId).orElseGet(null);
-                Cloth bottom = clothRepository.findByClothId(bottomId).orElseGet(null);
+                Cloth outer = clothRepository.findByClothId(style.getOuter().getClothId()).orElseGet(null);
+                Cloth top = clothRepository.findByClothId(style.getTop().getClothId()).orElseGet(null);
+                Cloth bottom = clothRepository.findByClothId(style.getBottom().getClothId()).orElseGet(null);
 
                 style.updateStyle(outer, top, bottom);
                 styleRepository.save(style);
             } else {
-                log.info("userId: {}, style is not Present", userId);
+                log.info("userId: {}, wearAt: {}, style is not Present", userId, formattedTomorrowDate);
                 styleService.uploadStyle(StyleUploadRequestDto.builder()
                         .outerId(outerId)
                         .topId(topId)
