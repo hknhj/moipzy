@@ -51,7 +51,10 @@ public class StyleController {
     public ResponseEntity<String> styleFeedback(@RequestBody StyleFeedbackRequestDto requestDto) {
         try {
             int styleId = styleService.updateTemperature(requestDto);
-            return ResponseEntity.ok("style feedback completed successfully. Id: " + styleId);
+            if (styleId != 0)
+                return ResponseEntity.ok("style feedback completed successfully. Id: " + styleId);
+            else
+                return ResponseEntity.ok("style feedback is already completed. Id: " + styleId);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

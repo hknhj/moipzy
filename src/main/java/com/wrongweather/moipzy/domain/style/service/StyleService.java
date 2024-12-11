@@ -198,6 +198,9 @@ public class StyleService {
         // style은 상의, 하의는 무조건 있음. 아우터는 있을 수도 있고, 없을 수도 있음.
         Style style = styleRepository.findByStyleId(requestDto.getStyleId()).orElseThrow(() -> new EntityNotFoundException("Style not found"));
 
+        if (style.getFeedback() != null)
+            return style.getStyleId();
+
         int highTemp = style.getHighTemp(); //해당 날의 최고기온
         int lowTemp = style.getLowTemp();  //해당 날의 최저기온
 
