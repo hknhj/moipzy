@@ -635,34 +635,35 @@ public class KaKaoService {
                 style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTomorrowDate + "Recommend" + number);
             }
 
+            int outerId = 0;
+            int topId = 0;
+            int bottomId = 0;
+
+            String[] numbers = style.split(",");
+
+            if (numbers.length == 3) {
+                outerId = Integer.parseInt(numbers[0]);
+                topId = Integer.parseInt(numbers[1]);
+                bottomId = Integer.parseInt(numbers[2]);
+            } else if (numbers.length == 2) {
+                topId = Integer.parseInt(numbers[0]);
+                outerId = Integer.parseInt(numbers[1]);
+            }
+
             // 옷차림 db에 저장
             // style을 조회해서, 존재하면 수정, 없으면 추가
             if (foundStyle != null) {
                 log.info("userId: {}, wearAt: {}, style isPresent", userId, formattedTodayDate);
 
-                Cloth outer = clothRepository.findByClothId(foundStyle.getOuter().getClothId()).orElse(null);
-                Cloth top = clothRepository.findByClothId(foundStyle.getTop().getClothId()).orElse(null);
-                Cloth bottom = clothRepository.findByClothId(foundStyle.getBottom().getClothId()).orElse(null);
+                Cloth outer = clothRepository.findByClothId(outerId).orElse(null);
+                Cloth top = clothRepository.findByClothId(topId).orElse(null);
+                Cloth bottom = clothRepository.findByClothId(bottomId).orElse(null);
 
                 foundStyle.updateStyle(outer, top, bottom);
                 styleRepository.save(foundStyle);
             } else {
                 log.info("userId: {}, wearAt: {}, style is not Present", userId, formattedTomorrowDate);
 
-                int outerId = 0;
-                int topId = 0;
-                int bottomId = 0;
-
-                String[] numbers = style.split(",");
-
-                if (numbers.length == 3) {
-                    outerId = Integer.parseInt(numbers[0]);
-                    topId = Integer.parseInt(numbers[1]);
-                    bottomId = Integer.parseInt(numbers[2]);
-                } else if (numbers.length == 2) {
-                    topId = Integer.parseInt(numbers[0]);
-                    outerId = Integer.parseInt(numbers[1]);
-                }
 
                 styleService.uploadStyle(StyleUploadRequestDto.builder()
                         .outerId(outerId)
