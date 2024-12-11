@@ -619,17 +619,20 @@ public class KaKaoService {
             int maxTemp = 100;
 
             Style foundStyle = null;
+            String style = "";
 
             if (koreanDate.equals("오늘")) {
                 minTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMinTemp"));
                 maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("todayMaxTemp"));
                 styleDate = today;
                 foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), today).orElse(null);
+                style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Recommend" + number);
             } else if (koreanDate.equals("내일")) {
                 minTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMinTemp"));
                 maxTemp = Integer.parseInt(redisTemplate.opsForValue().get("tomorrowMaxTemp"));
                 styleDate = tomorrow;
                 foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), tomorrow).orElse(null);
+                style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTomorrowDate + "Recommend" + number);
             }
 
             // 옷차림 db에 저장
@@ -645,10 +648,26 @@ public class KaKaoService {
                 styleRepository.save(foundStyle);
             } else {
                 log.info("userId: {}, wearAt: {}, style is not Present", userId, formattedTomorrowDate);
+
+                int outerId = 0;
+                int topId = 0;
+                int bottomId = 0;
+
+                String[] numbers = style.split(",");
+
+                if (numbers.length == 3) {
+                    outerId = Integer.parseInt(numbers[0]);
+                    topId = Integer.parseInt(numbers[1]);
+                    bottomId = Integer.parseInt(numbers[2]);
+                } else if (numbers.length == 2) {
+                    topId = Integer.parseInt(numbers[0]);
+                    outerId = Integer.parseInt(numbers[1]);
+                }
+
                 styleService.uploadStyle(StyleUploadRequestDto.builder()
-                        .outerId(foundStyle.getOuter().getClothId())
-                        .topId(foundStyle.getTop().getClothId())
-                        .bottomId(foundStyle.getBottom().getClothId())
+                        .outerId(outerId)
+                        .topId(topId)
+                        .bottomId(bottomId)
                         .wearAt(styleDate)
                         .highTemp(maxTemp)
                         .lowTemp(minTemp)
