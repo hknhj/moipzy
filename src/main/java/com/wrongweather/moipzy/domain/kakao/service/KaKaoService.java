@@ -750,7 +750,20 @@ public class KaKaoService {
                             return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
                     }
                 } else {
-                    return createSimpleTextResponse(Arrays.asList("이미 피드백이 완료됐습니다."));
+                    String feedbackKorean = "";
+                    Feedback existingFeedback = existingStyle.getFeedback();
+                    switch (existingFeedback) {
+                        case HOT:
+                            feedbackKorean = "더움";
+                            break;
+                        case GOOD:
+                            feedbackKorean = "만족";
+                            break;
+                        case COLD:
+                            feedbackKorean = "추움";
+                            break;
+                    }
+                    return createSimpleTextResponse(Arrays.asList("이미 피드백이 ["+ feedbackKorean +"]으로 등록됐습니다."));
                 }
             }
 
