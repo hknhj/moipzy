@@ -653,8 +653,8 @@ public class KaKaoService {
             // style을 조회해서, 존재하면 수정, 없으면 추가
             if (foundStyle != null) {
                 if (foundStyle.getFeedback() != null) {
-                    createSimpleTextResponse(Arrays.asList("이미 옷차림이 등록되었습니다."));
                     log.info("userId: {}, style is already got feedback.", userId);
+                    return createSimpleTextResponse(Arrays.asList("이미 옷차림이 등록되었습니다."));
                 }
                 log.info("userId: {}, wearAt: {}, style isPresent", userId, formattedTodayDate);
 
