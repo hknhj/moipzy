@@ -465,7 +465,6 @@ public class KaKaoService {
         Style foundStyle = null;
 
         if (utterance.equals("오늘 옷차림")) {
-
             foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), today).orElse(null);
             koreanDate = "오늘";
         } else if (utterance.equals("어제 옷차림")) {
@@ -711,28 +710,7 @@ public class KaKaoService {
 
             Optional<Style> foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), styleDate);
 
-            if (date.equals("오늘")) {
-                style = (String) redisTemplate.opsForHash().get(kakaoId, formattedTodayDate + "Style");
-            } else if (date.equals("어제")) {
-                style = (String) redisTemplate.opsForHash().get(kakaoId, formattedYesterdayDate + "Style");
-            }
-
-            if (style.isEmpty())
-                return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
-
-            String[] idArray = style.split(",");
-
-            if (idArray.length == 3) {
-                outerId = Integer.parseInt(idArray[0]);
-                topId = Integer.parseInt(idArray[1]);
-                bottomId = Integer.parseInt(idArray[2]);
-            } else if (idArray.length == 2) {
-                topId = Integer.parseInt(idArray[0]);
-                bottomId = Integer.parseInt(idArray[1]);
-            }
-
             // 입었던 날짜를 토대로 옷차림 가져옴
-
             if (foundStyle.isEmpty()) {
                 return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
             } else {
