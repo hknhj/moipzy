@@ -14,7 +14,7 @@ public class WeatherController {
     private final WeatherService weatherService;
 
     @GetMapping("/weather")
-    public void getWeather(@RequestParam String date) throws Exception {
+    public void getWeather() {
         weatherService.getWeather();
     }
 }

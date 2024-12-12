@@ -97,17 +97,14 @@ public class WeatherService {
             String dateTime = item.get("dt_txt").asText();
             LocalDate date = LocalDate.parse(dateTime.split(" ")[0]);
 
-//            int tempMin = (int) Math.round(item.get("main").get("temp_min").asDouble());
-//            int tempMax = (int) Math.round(item.get("main").get("temp_max").asDouble());
-
-            int feelsLike = (int) Math.round(item.get("feels_like").asDouble());
+            double feelsLike = item.get("main").get("feels_like").asDouble();
 
             if (date.equals(today)) {
-                todayMin = Math.min(todayMin, feelsLike);
-                todayMax = Math.max(todayMax, feelsLike);
+                todayMin = Math.min(todayMin, (int) feelsLike);
+                todayMax = Math.max(todayMax, (int) feelsLike);
             } else if (date.equals(tomorrow)) {
-                tomorrowMin = Math.min(tomorrowMin, feelsLike);
-                tomorrowMax = Math.max(tomorrowMax, feelsLike);
+                tomorrowMin = Math.min(tomorrowMin, (int) feelsLike);
+                tomorrowMax = Math.max(tomorrowMax, (int) feelsLike);
             }
         }
 
