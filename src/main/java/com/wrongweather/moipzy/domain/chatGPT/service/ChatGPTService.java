@@ -78,10 +78,12 @@ public class ChatGPTService {
                                         4. Color Coordination:
                                           -Avoid combinations where outerwear, top, and bottom all have similar or matching colors. Aim for balanced color contrasts or complementary colors.
                                           -Follow these specific color combination rules:
+                                          -Dark color : black, charcoal, brown, navy, deep blue, khaki, olive, green
+                                          -Bright color : lightgrey, white, beige, red, light blue, cream, blue
                                             -Avoid Monotone: Do not recommend outfits where all three items (outer, top, bottom) are the same tonal range, e.g.:
-                                                -Dark-Dark-Dark: (e.g., black, black, charcoal)
                                                 -Bright-Bright-Bright: (e.g., beige, cream, cream)
                                             -Preferred Contrasts:
+                                                -Dark-Dark-Dark: (e.g., black, black, charcoal)
                                                 -Dark-Dark-Bright: (e.g., black, black, light grey)
                                                 -Dark-Bright-Dark: (e.g., black, light grey, black)
                                                 -Bright-Dark-Bright: (e.g., beige, black, cream)
