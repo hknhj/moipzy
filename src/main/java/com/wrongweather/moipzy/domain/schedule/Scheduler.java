@@ -31,10 +31,12 @@ public class Scheduler {
     }
 
     // 매일 01:00 일정 업데이트
-    @Scheduled(cron = "0 0 1 * * *")
-    public void updateDailyEvents() {
-        log.info("Updating daily events information...");
+    @Scheduled(cron = "0 0 5 * * *")
+    public void updateDailyEventsWeatherStyle() {
+        log.info("Updating daily events, weather, style information...");
         calendarService.getAllEvents();
+        weatherService.getWeather();
+        styleService.getAllStyles();
     }
 
     // 1시간마다 google access token update
@@ -44,10 +46,10 @@ public class Scheduler {
         tokenService.refreshTokens();
     }
 
-    // 매일 05:00 날씨 업데이트
-    @Scheduled(cron = "0 0 5 * * *")
-    public void updateDailyWeather() {
-        log.info("Updating daily weather information...");
-        weatherService.getWeather();
-    }
+//    // 매일 05:00 날씨 업데이트
+//    @Scheduled(cron = "0 0 5 * * *")
+//    public void updateDailyWeather() {
+//        log.info("Updating daily weather information...");
+//        weatherService.getWeather();
+//    }
 }
