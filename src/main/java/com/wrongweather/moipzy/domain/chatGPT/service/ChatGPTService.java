@@ -72,7 +72,7 @@ public class ChatGPTService {
                                         3. Event Priority:
                                           -Recommend outfits based on the priority of the schedule:
                                           -For formal events (e.g., meetings, presentations), prioritize neat styles with blazers, slacks, or dressed shirts.
-                                          -For casual events (e.g., outings with friends), suggest semi-casual outfits like jeans with knitwear or hoodies.
+                                          -For casual events (e.g., outings with friends), suggest semi-casual outfits like jeans with knitwear or hoodies. Formal outer(e.g. coat, blazer, blouson) with sweaters and jeans could be also good.
                                           -For relaxed events, recommend comfortable outfits like sweatpants and hoodies.
                                           
                                         4. Color Coordination:
