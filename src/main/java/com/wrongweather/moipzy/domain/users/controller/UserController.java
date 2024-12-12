@@ -78,8 +78,8 @@ public class UserController {
         //응답 헤더에 Location 필드에 포함된 한글(유니코드 문자)**이 HTTP 표준 범위를 초과한 값(0-255)을 포함하고 있어서 오류발생
         String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
 
-        //String redirectUrl = "http://moipzyshop.vercel.app/loginmypage?token=" + token + "&username=" + encodedUsername;
-        String redirectUrl = "http://localhost:3000/loginmypage?token=" + token + "&username=" + encodedUsername;
+        String redirectUrl = "https://moipzyshop.vercel.app/loginmypage?token=" + token + "&username=" + encodedUsername;
+        //String redirectUrl = "http://localhost:3000/loginmypage?token=" + token + "&username=" + encodedUsername;
         response.sendRedirect(redirectUrl);
     }
 }
