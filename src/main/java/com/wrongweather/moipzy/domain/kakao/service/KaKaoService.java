@@ -692,21 +692,17 @@ public class KaKaoService {
             if (!date.equals("오늘") && !date.equals("어제"))
                 return createSimpleTextResponse(Arrays.asList("잘못된 입력입니다."));
 
-            String userId = (String) redisTemplate.opsForHash().get(kakaoId, "userId");
-
             String feedback = noSpace.substring(2, 4);
 
-            LocalDate today = LocalDate.now();
-            LocalDate yesterday = today.minusDays(1);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String formattedTodayDate = today.format(formatter);
-            String formattedYesterdayDate = yesterday.format(formatter);
+            String userId = (String) redisTemplate.opsForHash().get(kakaoId, "userId");
+
             LocalDate styleDate = LocalDate.now();
 
-            String style = "";
-            int outerId = 0;
-            int topId = 0;
-            int bottomId = 0;
+            if (date.equals("오늘"))
+                styleDate = LocalDate.now();
+            else if (date.equals("어제"))
+                styleDate = LocalDate.now().minusDays(1);
+
 
             Optional<Style> foundStyle = styleRepository.findByUser_UserIdAndWearAt(Integer.parseInt(userId), styleDate);
 
@@ -714,9 +710,14 @@ public class KaKaoService {
             if (foundStyle.isEmpty()) {
                 return createSimpleTextResponse(Arrays.asList("등록된 옷차림이 없습니다."));
             } else {
-                int styleId = foundStyle.get().getStyleId();
+                Style existingStyle = foundStyle.get();
+                int styleId = existingStyle.getStyleId();
 
-                if (foundStyle.get().getFeedback()==null) {
+                int outerId = existingStyle.getOuter().getClothId();
+                int topId = existingStyle.getTop().getClothId();
+                int bottomId = existingStyle.getBottom().getClothId();
+
+                if (foundStyle.get().getFeedback() == null) {
                     switch (feedback) {
                         case "더움":
                             styleService.updateTemperature(StyleFeedbackRequestDto.builder()
