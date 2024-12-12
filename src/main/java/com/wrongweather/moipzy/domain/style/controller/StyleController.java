@@ -37,6 +37,9 @@ public class StyleController {
     public ResponseEntity<String> uploadStyle(@RequestBody StyleUploadRequestDto styleUploadRequestDto) {
         int uploadedStyleId = styleService.uploadStyle(styleUploadRequestDto);
 
+        if (uploadedStyleId == 0)
+            return ResponseEntity.status(HttpStatus.CREATED).body("옷차림 피드백 이미 완료. Id: " + uploadedStyleId);
+
         return ResponseEntity.status(HttpStatus.CREATED).body("옷차림 등록 완료. Id: " + uploadedStyleId);
     }
 

@@ -142,6 +142,9 @@ public class StyleService {
         // 해당 유저의 해당 날짜에 옷차림이 존재하면 최근것으로 수정
         if (foundStyle.isPresent()) {
             Style existingStyle = foundStyle.get();
+            if (existingStyle.getFeedback() != null) // 피드백이 완료됐으면 변경x
+                return 0;
+
             existingStyle.updateStyle(outer, top, bottom);
             return styleRepository.save(existingStyle).getStyleId();
         }
