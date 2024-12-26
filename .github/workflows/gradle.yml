@@ -40,7 +40,7 @@ jobs:
     # 7. SpringBoot 애플리케이션 빌드
     - name: Build with Gradle Wrapper
       run: ./gradlew build
-
+      
     # 8. Docker 이미지 빌드
     - name: Build Docker image
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test .
