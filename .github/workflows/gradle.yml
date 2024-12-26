@@ -31,7 +31,7 @@ jobs:
 
     # 5. `application-ec2.yml`을 `resources` 폴더로 복사
     - name: Copy application-ec2.yml
-      run: echo "${{ secrets.APPLICATION_EC2_YML }}" > src/main/resources/application-ec2.yml
+      run: echo "${{ secrets.APPLICATION_EC2_YML }}" > src/main/resources/application.yml
 
     # 6. SpringBoot 애플리케이션 빌드
     - name: Build with Gradle Wrapper
