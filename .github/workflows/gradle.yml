@@ -23,38 +23,34 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # 3. Gradle 설정
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-
-    # 4. gradlew에 실행 권한 부여
+    # 3. gradlew에 실행 권한 부여
     - name: Grant execute permission to gradlew
       run: chmod +x ./gradlew
 
-    # 5. src/main/resources 디렉토리 생성 (필요한 경우)
+    # 4. src/main/resources 디렉토리 생성 (필요한 경우)
     - name: Create resources directory
       run: mkdir -p src/main/resources
 
-    # 6. `application-ec2.yml`을 `resources` 폴더로 복사
+    # 5. `application-ec2.yml`을 `resources` 폴더로 복사
     - name: Copy application-ec2.yml
       run: echo "${{ secrets.APPLICATION_EC2_YML }}" > src/main/resources/application.yml
 
-    # 7. SpringBoot 애플리케이션 빌드
+    # 6. SpringBoot 애플리케이션 빌드
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: ./gradlew clean build
       
-    # 8. Docker 이미지 빌드
+    # 7. Docker 이미지 빌드
     - name: Build Docker image
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test .
 
-    # 9. Docker Hub 로그인
+    # 8. Docker Hub 로그인
     - name: Docker login
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    # 10. Docker Hub에 푸시
+    # 9. Docker Hub에 푸시
     - name: Docker Hub push
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
 
