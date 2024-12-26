@@ -77,7 +77,7 @@ jobs:
 
     # 3. Docker run new container
     - name: run new container
-      run: docker run --rm -it -d -p 80:8080 --name spring-cicd-test-container ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
+      run: docker run --rm -it -d -p 8080:8080 --name spring-cicd-test-container ${{ secrets.DOCKERHUB_USERNAME }}/spring-cicd-test
 
     # 4. 도커 예전 이미지 삭제
     - name: delete old docker image
