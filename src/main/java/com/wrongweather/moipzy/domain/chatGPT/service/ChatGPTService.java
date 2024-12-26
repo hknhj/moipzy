@@ -151,6 +151,4 @@ public class ChatGPTService {
         }
         return null;
     }
-
-
 }
