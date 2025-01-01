@@ -18,7 +18,8 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-application.yml
+*.yml
+*.webp
 *.jpg
 *.jpeg
 *.sql
