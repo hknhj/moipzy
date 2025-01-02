@@ -68,7 +68,7 @@ jobs:
     - name: stop container
       run: |
         if [ $(sudo docker ps -a -q -f name=spring-cicd-test-container) ]; then
-          docker stop spring-cicd-test
+          docker stop spring-cicd-test-container
         else
           echo "Container spring-cicd-test-container not found or already stopped"
         fi
