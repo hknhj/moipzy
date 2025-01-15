@@ -13,14 +13,13 @@ import java.security.Key;
 import java.util.Date;
 
 @Slf4j
-@Component
 public class JwtTokenUtil {
 
     private final Key secretKey;
     private final long expireTime = 1000 * 60 * 60; // 1시간
 
     // Secret Key를 Base64 디코딩하여 Key 객체로 초기화
-    public JwtTokenUtil(@Value("${jwt.secret}") String secretKey) {
+    public JwtTokenUtil(String secretKey) {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 

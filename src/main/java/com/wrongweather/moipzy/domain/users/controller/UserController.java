@@ -1,6 +1,5 @@
 package com.wrongweather.moipzy.domain.users.controller;
 
-import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
 import com.wrongweather.moipzy.domain.users.service.UserService;
@@ -23,7 +22,6 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final JwtTokenUtil jwtTokenUtil;
 
     @Value("${oauth2.google.client-id}")
     private String clientId;

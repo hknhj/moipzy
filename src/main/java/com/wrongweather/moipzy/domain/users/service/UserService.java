@@ -42,14 +42,14 @@ public class UserService {
 
     // 회원가입 서비스
     public UserIdResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
+        User savedUser = userRepository.save(userRegisterRequestDto.toEntity(encoder.encode(userRegisterRequestDto.getPassword())));
 
-        String encodedPassword = null;
-        if (userRegisterRequestDto.getPassword() != null) {
-            encodedPassword = encoder.encode(userRegisterRequestDto.getPassword());
+        if (savedUser == null) {
+            throw new RuntimeException("User could not be saved");
         }
 
         return UserIdResponseDto.builder()
-                .userId(userRepository.save(userRegisterRequestDto.toEntity(encodedPassword)).getUserId())
+                .userId(savedUser.getUserId())
                 .build();
     }
 
@@ -58,7 +58,7 @@ public class UserService {
         String requestEmail = userLoginRequestDto.getEmail();
         String requestPassword = userLoginRequestDto.getPassword();
 
-        User foundUser = userValid(requestEmail).orElseThrow(LoginFailedException::new);
+        User foundUser = userRepository.findByEmail(requestEmail).orElseThrow(LoginFailedException::new);
 
         if(!encoder.matches(requestPassword, foundUser.getPassword())) {
             throw new LoginFailedException();
@@ -148,10 +148,6 @@ public class UserService {
         headers.set("Authorization", "Bearer " + accessToken);
         HttpEntity entity = new HttpEntity(headers);
         return restTemplate.exchange(resourceUri, HttpMethod.GET, entity, JsonNode.class).getBody();
-    }
-
-    private Optional<User> userValid(String email) {
-        return userRepository.findByEmail(email);
     }
 
     public boolean isRegistered(String email) {

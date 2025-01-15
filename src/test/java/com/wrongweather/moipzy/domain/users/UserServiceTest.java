@@ -1,150 +1,101 @@
-//package com.wrongweather.moipzy.domain.users;
-//
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
-//import com.wrongweather.moipzy.domain.users.controller.AuthController;
-//import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
-//import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
-//import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
-//import com.wrongweather.moipzy.domain.users.service.UserService;
-//import io.jsonwebtoken.Claims;
-//import org.junit.jupiter.api.Assertions;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.test.annotation.Rollback;
-//import org.springframework.test.web.servlet.MockMvc;
-//import org.springframework.test.web.servlet.MvcResult;
-//import org.springframework.transaction.annotation.Transactional;
-//import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-//
-//
-//@SpringBootTest
-//@AutoConfigureMockMvc
-//public class UserServiceTest {
-//    @Autowired
-//    private UserService userService;
-//
-//    @Autowired
-//    private UserRepository userRepository;
-//
-//    @Autowired
-//    private AuthController authController;
-//
-//    @Autowired
-//    private MockMvc mockMvc;
-//
-//    @Autowired
-//    private ObjectMapper objectMapper;
-//
-//
-//    private PasswordEncoder passwordEncoder;
-//
-//    @BeforeEach
-//    public void setUp() {
-//        passwordEncoder = new BCryptPasswordEncoder();
-//    }
-//
-//    @Test
-//    @Transactional
-//    @Rollback(true)
-//    @DisplayName("회원가입 성공")
-//    void 회원가입() {
-//        //given
-//        UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
-//                .email("testemail2@naver.com")
-//                .password("test")
-//                .username("testname")
-//                .build();
-//
-//        //when
-//        UserIdResponseDto register = userService.register(userRegisterRequestDto);
-//
-//        //then
-//        User user = userRepository.findByUserId(register.getUserId()).orElseThrow(() -> new RuntimeException());
-//        assertEquals(user.getEmail(), userRegisterRequestDto.getEmail());
-//        Assertions.assertTrue(passwordEncoder.matches(userRegisterRequestDto.getPassword(), user.getPassword()));
-//        assertEquals(user.getUsername(), userRegisterRequestDto.getUsername());
-//    }
-//
-//    @Test
-//    @Transactional
-//    @Rollback(true)
-//    @DisplayName("로그인 성공")
-//    void 로그인() {
-//        //given
-//        UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
-//                .email("temail@naver.com")
-//                .password("tpwd")
-//                .username("testname")
-//                .build();
-//
-//        User user = userRepository.findByUserId(userService.register(userRegisterRequestDto).getUserId()).orElseThrow(() -> new RuntimeException());
-//
-//        UserLoginRequestDto userLoginRequestDto = UserLoginRequestDto.builder()
-//                .email(user.getEmail())
-//                .password("tpwd")
-//                .build();
-//
-//        //when
-//        User loginedUser = userService.login(userLoginRequestDto);
-//
-//        //then
-//        assertEquals(loginedUser.getEmail(), userRegisterRequestDto.getEmail());
-//        Assertions.assertTrue(passwordEncoder.matches(userRegisterRequestDto.getPassword(), loginedUser.getPassword()));
-//        assertEquals(loginedUser.getUsername(), userRegisterRequestDto.getUsername());
-//    }
-//
-//    @Test
-//    @Transactional
-//    @Rollback(true)
-//    @DisplayName("JWT 토큰 발행 성공")
-//    void JWT토큰발행() throws Exception {
-//        //given
-//        UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
-//                .email("temail@naver.com")
-//                .password("tpwd")
-//                .username("testname")
-//                .build();
-//
-//        User user = userRepository.findByUserId(userService.register(userRegisterRequestDto).getUserId()).orElseThrow(() -> new RuntimeException());
-//
-//        UserLoginRequestDto userLoginRequestDto = UserLoginRequestDto.builder()
-//                .email(user.getEmail())
-//                .password("tpwd")
-//                .build();
-//
-//        User loginedUser = userService.login(userLoginRequestDto);
-//
-//        //when
-//        MvcResult result = mockMvc.perform(post("/moipzy/users/login")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(userLoginRequestDto)))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//
-//        //then
-//        //응답 헤더에서 JWT token 추출
-//        String token = result.getResponse().getHeader("Authorization").replace("Bearer ", "");
-//
-//        // JWT 토큰에서 userId 추출
-//        Claims claims = JwtTokenUtil.extractClaims(token);
-//        Integer userId = (Integer) claims.get("userId");
-//        String email = (String) claims.get("email");
-//        String username = (String) claims.get("username");
-//
-//        // userId가 null이 아닌지 확인
-//        assertEquals(loginedUser.getUserId(), userId);
-//    }
-//}
+package com.wrongweather.moipzy.domain.users;
+
+import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
+import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
+import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
+import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
+import com.wrongweather.moipzy.domain.users.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+
+@ExtendWith(MockitoExtension.class)
+public class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private UserService userService;
+
+    private BCryptPasswordEncoder encoder;
+    private JwtTokenUtil jwtTokenUtil;
+
+    @BeforeEach
+    public void setUp() {
+        encoder = new BCryptPasswordEncoder();
+        String secretKey = "a97B5InEzfDn9CAfguLdaQvquXe5MswNw-no79Bq8tU=";
+        jwtTokenUtil = new JwtTokenUtil(secretKey);
+        ReflectionTestUtils.setField(userService, "encoder", encoder);
+        ReflectionTestUtils.setField(userService, "jwtTokenUtil", jwtTokenUtil);
+    }
+
+    @Test
+    @DisplayName("회원가입 성공")
+    void saveUser() {
+        //given
+        UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
+                .email("testemail3@naver.com")
+                .password("test")
+                .username("testname")
+                .build();
+
+        User user = User.builder()
+                .email(userRegisterRequestDto.getEmail())
+                .password(encoder.encode(userRegisterRequestDto.getPassword()))
+                .username(userRegisterRequestDto.getUsername())
+                .build();
+        user.setId(1);
+
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        //when
+        UserIdResponseDto userIdResponseDto = userService.register(userRegisterRequestDto);
+
+        //then
+        verify(userRepository, times(1)).save(any(User.class));
+        assertEquals(1, userIdResponseDto.getUserId());
+    }
+
+    @Test
+    @DisplayName("로그인 성공")
+    void 로그인() {
+        //given
+        User existingUser = User.builder()
+                .email("testemail@example.com")
+                .password(encoder.encode("password123"))
+                .username("testuser")
+                .build();
+
+        given(userRepository.findByEmail("testemail@example.com")).willReturn(Optional.of(existingUser));
+
+        //로그인 정보
+        UserLoginRequestDto userLoginRequestDto = UserLoginRequestDto.builder()
+                .email("testemail@example.com")
+                .password("password123")
+                .build();
+
+        //when
+        List<String> tokenAndUsername = userService.login(userLoginRequestDto);
+
+        //then
+        assertNotNull(tokenAndUsername);
+        assertNotNull(tokenAndUsername.get(0), "토큰이 반환되어야 합니다.");
+        assertTrue(tokenAndUsername.get(0).startsWith("eyJ"), "JWT 토큰이어야 합니다.");
+        assertEquals(existingUser.getUsername(), tokenAndUsername.get(1), "유저 이름이 같지 않습니다.");
+    }
+}
