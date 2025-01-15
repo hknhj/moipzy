@@ -45,7 +45,7 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("회원가입 성공")
+    @DisplayName("회원가입")
     void saveUser() {
         //given
         UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
@@ -72,7 +72,7 @@ public class UserServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 성공")
+    @DisplayName("로그인")
     void 로그인() {
         //given
         User existingUser = User.builder()

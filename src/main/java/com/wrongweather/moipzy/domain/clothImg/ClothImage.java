@@ -25,4 +25,8 @@ public class ClothImage {
     public ClothImage(String imgUrl) {
         this.imgUrl = imgUrl;
     }
+
+    public void setClothImgId(long clothImgId) {
+        this.clothImgId = clothImgId;
+    }
 }

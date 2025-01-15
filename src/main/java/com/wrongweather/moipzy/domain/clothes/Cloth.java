@@ -108,4 +108,8 @@ public class Cloth {
         this.soloHighTemperature = soloHighTemperature;
         this.soloLowTemperature = soloLowTemperature;
     }
+
+    public void setClothId(int clothId) {
+        this.clothId = clothId;
+    }
 }

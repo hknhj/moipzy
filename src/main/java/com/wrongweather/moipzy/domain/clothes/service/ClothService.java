@@ -91,12 +91,11 @@ public class ClothService {
     }
 
     public ClothResponseDto getCloth(int userId, int clothId) throws RuntimeException {
-        //System.out.println(clothId);
         Cloth cloth = clothRepository.findByClothId(clothId).orElseThrow(() -> new RuntimeException());
         if (userId != cloth.getUser().getUserId()) {
             throw new RuntimeException();
         }
-        System.out.println(cloth.getClothImg().getImgUrl());
+
         return ClothResponseDto.builder()
                 .user(cloth.getUser())
                 .cloth(cloth)
@@ -128,6 +127,11 @@ public class ClothService {
             throw new RuntimeException();
         }
         List<Cloth> clothList = clothRepository.findAllByLargeCategory(temp);
+
+        for (Cloth cloth : clothList)
+            if (cloth.getUser().getUserId() != userId)
+                throw new RuntimeException();
+
         List<ClothResponseDto> clothResponseDtoList = new ArrayList<>();
         for (Cloth cloth : clothList) {
             clothResponseDtoList.add(ClothResponseDto.builder()
