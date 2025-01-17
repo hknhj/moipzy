@@ -3,7 +3,9 @@ package com.wrongweather.moipzy.domain.clothes.controller;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothUpdateRequestDto;
+import com.wrongweather.moipzy.domain.clothes.exception.ClothNotFoundException;
 import com.wrongweather.moipzy.domain.clothes.service.ClothService;
+import com.wrongweather.moipzy.domain.exception.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -77,4 +79,12 @@ public class ClothController {
         return ResponseEntity.status(HttpStatus.OK).body("옷 삭제 완료. Id : " + deleteClothId);
     }
 
+    @ExceptionHandler(ClothNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleClothNotFoundException(ClothNotFoundException e) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
 }

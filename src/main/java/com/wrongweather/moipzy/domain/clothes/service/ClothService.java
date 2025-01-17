@@ -10,6 +10,7 @@ import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothUpdateRequestDto;
+import com.wrongweather.moipzy.domain.clothes.exception.ClothNotFoundException;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -91,10 +92,9 @@ public class ClothService {
     }
 
     public ClothResponseDto getCloth(int userId, int clothId) throws RuntimeException {
-        Cloth cloth = clothRepository.findByClothId(clothId).orElseThrow(() -> new RuntimeException());
-        if (userId != cloth.getUser().getUserId()) {
-            throw new RuntimeException();
-        }
+
+        Cloth cloth = clothRepository.findByUser_UserIdAndClothId(userId, clothId).orElseThrow(() ->
+                new ClothNotFoundException("Cloth with id " + clothId + " not found for user " + userId));
 
         return ClothResponseDto.builder()
                 .user(cloth.getUser())

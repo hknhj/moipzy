@@ -9,6 +9,7 @@ import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
+import com.wrongweather.moipzy.domain.clothes.exception.ClothNotFoundException;
 import com.wrongweather.moipzy.domain.clothes.service.ClothService;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
@@ -24,6 +25,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -137,7 +139,7 @@ public class ClothServiceTest {
                 .build();
         existingCloth.setClothId(1);
 
-        given(clothRepository.findByClothId(existingCloth.getClothId())).willReturn(Optional.of(existingCloth));
+        given(clothRepository.findByUser_UserIdAndClothId(existingUser.getUserId(), existingCloth.getClothId())).willReturn(Optional.of(existingCloth));
 
         //when
         ClothResponseDto clothResponseDto = clothService.getCloth(existingUser.getUserId(), existingCloth.getClothId());
@@ -148,6 +150,38 @@ public class ClothServiceTest {
         assertEquals(clothResponseDto.getSmallCategory(), SmallCategory.T_SHIRT);
         assertEquals(clothResponseDto.getColor(), Color.BLUE);
         assertEquals(clothResponseDto.getDegree(), Degree.NORMAL);
+    }
+
+    @Test
+    @DisplayName("옷 단일 조회 실패")
+    void 옷단일조회실패() {
+        // given
+        User existingUser = userRepository.findByUserId(1).orElseThrow(() -> new RuntimeException());
+
+        // 미리 생성된 옷 이미지
+        ClothImage testImage = ClothImage.builder()
+                .imgUrl("http://example.com/images/shirt.jpg")
+                .build();
+        testImage.setClothImgId(1);
+
+        when(clothImageRepository.findById(1)).thenReturn(Optional.of(testImage));
+
+        Cloth existingCloth = Cloth.builder()
+                .user(existingUser)
+                .largeCategory(LargeCategory.TOP)
+                .smallCategory(SmallCategory.T_SHIRT)
+                .color(Color.BLUE)
+                .degree(Degree.NORMAL)
+                .clothImage(clothImageRepository.findById(1).orElseThrow(() -> new RuntimeException()))
+                .build();
+        existingCloth.setClothId(1);
+
+        given(clothRepository.findByUser_UserIdAndClothId(existingUser.getUserId(), existingCloth.getClothId()+1)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> clothService.getCloth(existingUser.getUserId(), existingCloth.getClothId() + 1))
+                .isInstanceOf(ClothNotFoundException.class);
+
     }
 
     @Test

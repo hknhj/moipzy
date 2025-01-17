@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface ClothRepository extends JpaRepository<Cloth, Long> {
     Optional<Cloth> findByClothId(int clothId);
 
+    Optional<Cloth> findByUser_UserIdAndClothId(int userId, int clothId);
+
     List<Cloth> findAllByUser_UserId(int userId);
 
     List<Cloth> findAllByLargeCategory(LargeCategory largeCategory);
