@@ -4,6 +4,8 @@ import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
 import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
+import com.wrongweather.moipzy.domain.users.exception.EmailAlreadyExistsException;
+import com.wrongweather.moipzy.domain.users.exception.LoginFailedException;
 import com.wrongweather.moipzy.domain.users.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -72,6 +75,29 @@ public class UserServiceTest {
     }
 
     @Test
+    @DisplayName("이미 존재하는 이메일로 회원가입 시도")
+    void tryRegisterWithAlreadyRegisteredEmail() {
+        // given
+        User existingUser = User.builder()
+                .email("qwer@naver.com")
+                .password("1234")
+                .username("nick")
+                .build();
+
+        given(userRepository.findByEmail(existingUser.getEmail())).willReturn(Optional.of(existingUser));
+
+        UserRegisterRequestDto userRegisterRequestDto = UserRegisterRequestDto.builder()
+                .email(existingUser.getEmail())
+                .password("asdf")
+                .username("nick")
+                .build();
+
+        // when & then
+        assertThatThrownBy(() -> userService.register(userRegisterRequestDto))
+                .isInstanceOf(EmailAlreadyExistsException.class);
+    }
+
+    @Test
     @DisplayName("로그인")
     void 로그인() {
         //given
@@ -97,5 +123,44 @@ public class UserServiceTest {
         assertNotNull(tokenAndUsername.get(0), "토큰이 반환되어야 합니다.");
         assertTrue(tokenAndUsername.get(0).startsWith("eyJ"), "JWT 토큰이어야 합니다.");
         assertEquals(existingUser.getUsername(), tokenAndUsername.get(1), "유저 이름이 같지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 이메일로 로그인")
+    void loginWithNotExistingEmail() {
+        // given
+        UserLoginRequestDto userLoginRequestDto = UserLoginRequestDto.builder()
+                .email("notExisting@naver.com")
+                .password("1234")
+                .build();
+
+        given(userRepository.findByEmail(userLoginRequestDto.getEmail())).willReturn(Optional.empty());
+
+
+        // when & then
+        assertThatThrownBy(() -> userService.login(userLoginRequestDto))
+                .isInstanceOf(LoginFailedException.class);
+    }
+
+    @Test
+    @DisplayName("잘못된 비밀번호로 로그인")
+    void loginWithWrongPassword() {
+        // given
+        User existingUser = User.builder()
+                .email("qwer@naver.com")
+                .password("1234")
+                .username("nick")
+                .build();
+
+        UserLoginRequestDto userLoginRequestDto = UserLoginRequestDto.builder()
+                .email(existingUser.getEmail())
+                .password("asdf")
+                .build();
+
+        given(userRepository.findByEmail(existingUser.getEmail())).willReturn(Optional.of(existingUser));
+
+        // when & then
+        assertThatThrownBy(() -> userService.login(userLoginRequestDto))
+                .isInstanceOf(LoginFailedException.class);
     }
 }
