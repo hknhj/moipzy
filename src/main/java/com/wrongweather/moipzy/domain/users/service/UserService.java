@@ -10,6 +10,7 @@ import com.wrongweather.moipzy.domain.users.UserRepository;
 import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
+import com.wrongweather.moipzy.domain.users.exception.EmailAlreadyExistsException;
 import com.wrongweather.moipzy.global.exception.LoginFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +43,15 @@ public class UserService {
 
     // 회원가입 서비스
     public UserIdResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
-        User savedUser = userRepository.save(userRegisterRequestDto.toEntity(encoder.encode(userRegisterRequestDto.getPassword())));
 
-        if (savedUser == null) {
-            throw new RuntimeException("User could not be saved");
-        }
+        // 이미 존재하는 이메일인지 확인
+        userRepository.findByEmail(userRegisterRequestDto.getEmail())
+                .ifPresent(user -> {
+                    throw new EmailAlreadyExistsException("Email already exists: " + userRegisterRequestDto.getEmail());
+                });
+
+        // 유저 정보 저장
+        User savedUser = userRepository.save(userRegisterRequestDto.toEntity(encoder.encode(userRegisterRequestDto.getPassword())));
 
         return UserIdResponseDto.builder()
                 .userId(savedUser.getUserId())
