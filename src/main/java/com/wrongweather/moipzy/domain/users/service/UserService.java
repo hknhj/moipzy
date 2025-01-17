@@ -11,7 +11,7 @@ import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
 import com.wrongweather.moipzy.domain.users.exception.EmailAlreadyExistsException;
-import com.wrongweather.moipzy.global.exception.LoginFailedException;
+import com.wrongweather.moipzy.domain.users.exception.LoginFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -27,7 +27,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -63,8 +62,10 @@ public class UserService {
         String requestEmail = userLoginRequestDto.getEmail();
         String requestPassword = userLoginRequestDto.getPassword();
 
+        // 이메일이 존재하지 않을 시 예외 발생
         User foundUser = userRepository.findByEmail(requestEmail).orElseThrow(LoginFailedException::new);
 
+        // 이메일과 비밀번호가 일치하지 않을 때 예외 발생
         if(!encoder.matches(requestPassword, foundUser.getPassword())) {
             throw new LoginFailedException();
         }
