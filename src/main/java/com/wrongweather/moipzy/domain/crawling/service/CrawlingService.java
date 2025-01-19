@@ -1,24 +1,24 @@
 package com.wrongweather.moipzy.domain.crawling.service;
 
 import com.wrongweather.moipzy.domain.crawling.dto.CrawlingResponseDto;
+import com.wrongweather.moipzy.domain.crawling.exception.CrawlingFailedException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class CrawlingService {
 
     public CrawlingResponseDto crawlMusinsa(String url) {
         try {
-
             // Jsoup으로 HTML 문서 가져오기
             Document doc = Jsoup.connect(url)
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
                     .timeout(10_000)
                     .get();
-
-            System.out.println(doc.text());
 
             // 이미지 URL 크롤링
             Element imageElement = doc.selectFirst("meta[property=og:image]");
@@ -37,9 +37,8 @@ public class CrawlingService {
                     .productName(productName)
                     .imageUrl(imageUrl)
                     .build();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+        } catch (IOException e) {
+            throw new CrawlingFailedException("크롤링 중 문제가 발생했습니다. URL: " + url, e);
         }
     }
 

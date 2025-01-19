@@ -91,7 +91,7 @@ public class ClothService {
         return clothRepository.save(cloth).getClothId();
     }
 
-    public ClothResponseDto getCloth(int userId, int clothId) throws RuntimeException {
+    public ClothResponseDto getCloth(int userId, int clothId) {
 
         Cloth cloth = clothRepository.findByUser_UserIdAndClothId(userId, clothId).orElseThrow(() ->
                 new ClothNotFoundException("Cloth with id " + clothId + " not found for user " + userId));
