@@ -1,6 +1,5 @@
 package com.wrongweather.moipzy.domain.style.controller;
 
-import com.wrongweather.moipzy.domain.chatGPT.dto.OutfitResponse;
 import com.wrongweather.moipzy.domain.style.dto.StyleFeedbackRequestDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleRecommendResponseDto;
 import com.wrongweather.moipzy.domain.style.dto.StyleResponseDto;
