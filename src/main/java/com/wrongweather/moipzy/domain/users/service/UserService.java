@@ -7,9 +7,9 @@ import com.wrongweather.moipzy.domain.token.Token;
 import com.wrongweather.moipzy.domain.token.TokenRepository;
 import com.wrongweather.moipzy.domain.users.User;
 import com.wrongweather.moipzy.domain.users.UserRepository;
-import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
+import com.wrongweather.moipzy.domain.users.dto.UserRegisterResponseDto;
 import com.wrongweather.moipzy.domain.users.exception.EmailAlreadyExistsException;
 import com.wrongweather.moipzy.domain.users.exception.LoginFailedException;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +41,7 @@ public class UserService {
     private final RedisTemplate<String, String> redisTemplate;
 
     // 회원가입 서비스
-    public UserIdResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
+    public UserRegisterResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
 
         // 이미 존재하는 이메일인지 확인
         userRepository.findByEmail(userRegisterRequestDto.getEmail())
@@ -52,8 +52,10 @@ public class UserService {
         // 유저 정보 저장
         User savedUser = userRepository.save(userRegisterRequestDto.toEntity(encoder.encode(userRegisterRequestDto.getPassword())));
 
-        return UserIdResponseDto.builder()
+        return UserRegisterResponseDto.builder()
                 .userId(savedUser.getUserId())
+                .email(savedUser.getEmail())
+                .username(savedUser.getUsername())
                 .build();
     }
 

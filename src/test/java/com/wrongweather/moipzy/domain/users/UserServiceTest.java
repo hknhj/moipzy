@@ -1,9 +1,9 @@
 package com.wrongweather.moipzy.domain.users;
 
 import com.wrongweather.moipzy.domain.jwt.JwtTokenUtil;
-import com.wrongweather.moipzy.domain.users.dto.UserIdResponseDto;
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
+import com.wrongweather.moipzy.domain.users.dto.UserRegisterResponseDto;
 import com.wrongweather.moipzy.domain.users.exception.EmailAlreadyExistsException;
 import com.wrongweather.moipzy.domain.users.exception.LoginFailedException;
 import com.wrongweather.moipzy.domain.users.service.UserService;
@@ -67,11 +67,13 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         //when
-        UserIdResponseDto userIdResponseDto = userService.register(userRegisterRequestDto);
+        UserRegisterResponseDto userRegisterResponseDto = userService.register(userRegisterRequestDto);
 
         //then
         verify(userRepository, times(1)).save(any(User.class));
-        assertEquals(1, userIdResponseDto.getUserId());
+        assertEquals(1, userRegisterResponseDto.getUserId());
+        assertEquals("testemail3@naver.com", userRegisterResponseDto.getEmail());
+        assertEquals("testname", userRegisterResponseDto.getUsername());
     }
 
     @Test

@@ -82,9 +82,9 @@ public class ClothController {
     @ExceptionHandler(ClothNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleClothNotFoundException(ClothNotFoundException e) {
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.NOT_FOUND.value(),
                 e.getMessage()
         );
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }

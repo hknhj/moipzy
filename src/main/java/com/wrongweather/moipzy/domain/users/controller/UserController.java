@@ -2,6 +2,7 @@ package com.wrongweather.moipzy.domain.users.controller;
 
 import com.wrongweather.moipzy.domain.users.dto.UserLoginRequestDto;
 import com.wrongweather.moipzy.domain.users.dto.UserRegisterRequestDto;
+import com.wrongweather.moipzy.domain.users.dto.UserRegisterResponseDto;
 import com.wrongweather.moipzy.domain.users.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,8 @@ public class UserController {
 
     // 일반 회원가입 진행
     @PostMapping("/register")
-    public String register(@Validated @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
-        userService.register(userRegisterRequestDto);
-        return "redirect:/home";  // 홈 화면으로 리디렉션
+    public UserRegisterResponseDto register(@Validated @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
+        return userService.register(userRegisterRequestDto);
     }
 
     // 일반 로그인 진행
