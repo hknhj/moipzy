@@ -9,6 +9,7 @@ import com.wrongweather.moipzy.domain.clothes.category.LargeCategory;
 import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
+import com.wrongweather.moipzy.domain.clothes.dto.ClothUpdateRequestDto;
 import com.wrongweather.moipzy.domain.clothes.exception.ClothNotFoundException;
 import com.wrongweather.moipzy.domain.clothes.service.ClothService;
 import com.wrongweather.moipzy.domain.users.User;
@@ -25,6 +26,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -176,7 +178,7 @@ public class ClothServiceTest {
                 .build();
         existingCloth.setClothId(1);
 
-        given(clothRepository.findByUser_UserIdAndClothId(existingUser.getUserId(), existingCloth.getClothId()+1)).willReturn(Optional.empty());
+        given(clothRepository.findByUser_UserIdAndClothId(existingUser.getUserId(), existingCloth.getClothId() + 1)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> clothService.getCloth(existingUser.getUserId(), existingCloth.getClothId() + 1))
@@ -310,5 +312,71 @@ public class ClothServiceTest {
             assertEquals(clothResponseDto.getUserId(), existingUser.getUserId());
             assertEquals(clothResponseDto.getLargeCategory(), LargeCategory.TOP);
         }
+    }
+
+    @Test
+    @DisplayName("옷 수정")
+    void 옷수정() {
+        // given
+        int clothId = 1;
+        User existingUser = userRepository.findByUserId(1).orElseThrow(() -> new RuntimeException());
+
+        ClothUpdateRequestDto clothUpdateRequestDto = ClothUpdateRequestDto.builder()
+                .largeCategory(LargeCategory.TOP)
+                .smallCategory(SmallCategory.T_SHIRT)
+                .color(Color.WHITE)
+                .degree(Degree.NORMAL)
+                .build();
+
+        Cloth cloth = Cloth.builder()
+                .user(existingUser)
+                .largeCategory(LargeCategory.TOP)
+                .smallCategory(SmallCategory.LONG_SLEEVE)
+                .color(Color.BEIGE)
+                .degree(Degree.NORMAL)
+                .build();
+        cloth.setClothId(clothId);
+
+        given(clothRepository.findByClothId(clothId)).willReturn(Optional.of(cloth));
+
+        // when
+        int updatedClothId = clothService.updateCloth(clothId, clothUpdateRequestDto);
+
+        // then
+        assertThat(updatedClothId).isEqualTo(clothId);
+        assertThat(cloth.getLargeCategory()).isEqualTo(LargeCategory.TOP);
+        assertThat(cloth.getSmallCategory()).isEqualTo(SmallCategory.T_SHIRT);
+        assertThat(cloth.getColor()).isEqualTo(Color.WHITE);
+        assertThat(cloth.getDegree()).isEqualTo(Degree.NORMAL);
+
+        verify(clothRepository).findByClothId(clothId);
+    }
+
+    @Test
+    @DisplayName("옷 삭제")
+    void 옷삭제() {
+        // given
+        int clothId = 1;
+        User existingUser = userRepository.findByUserId(1).orElseThrow(() -> new RuntimeException());
+
+        Cloth cloth = Cloth.builder()
+                .user(existingUser)
+                .largeCategory(LargeCategory.OUTER)
+                .smallCategory(SmallCategory.BLAZER)
+                .color(Color.BLACK)
+                .degree(Degree.NORMAL)
+                .build();
+        cloth.setClothId(clothId);
+
+        given(clothRepository.findByClothId(clothId)).willReturn(Optional.of(cloth));
+
+        // when
+        int deletedClothId = clothService.deleteCloth(clothId);
+
+        // then
+        assertThat(deletedClothId).isEqualTo(clothId);
+
+        verify(clothRepository).delete(cloth);
+        verify(clothRepository).findByClothId(clothId);
     }
 }

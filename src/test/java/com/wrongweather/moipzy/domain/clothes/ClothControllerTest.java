@@ -9,6 +9,7 @@ import com.wrongweather.moipzy.domain.clothes.category.SmallCategory;
 import com.wrongweather.moipzy.domain.clothes.controller.ClothController;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothRegisterRequestDto;
 import com.wrongweather.moipzy.domain.clothes.dto.ClothResponseDto;
+import com.wrongweather.moipzy.domain.clothes.dto.ClothUpdateRequestDto;
 import com.wrongweather.moipzy.domain.clothes.exception.ClothNotFoundException;
 import com.wrongweather.moipzy.domain.clothes.service.ClothService;
 import com.wrongweather.moipzy.domain.exception.GlobalExceptionHandler;
@@ -23,10 +24,14 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ClothController.class)
@@ -41,8 +46,6 @@ public class ClothControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private GlobalExceptionHandler globalExceptionHandler;
 
     @Test
     void uploadCloth() throws Exception {
@@ -154,21 +157,113 @@ public class ClothControllerTest {
 
     @Test
     void getAllCloths() throws Exception {
+        // given
+        int userId = 1;
 
-    }
+        User user = User.builder()
+                .email("test@naver.com")
+                .password("1234")
+                .username("Nick")
+                .build();
+        user.setId(userId);
 
-    @Test
-    void getAllOuter() throws Exception {
+        List<ClothResponseDto> clothes = List.of(
+                ClothResponseDto.builder()
+                        .user(user)
+                        .cloth(Cloth.builder()
+                                .user(user)
+                                .largeCategory(LargeCategory.TOP)
+                                .smallCategory(SmallCategory.LONG_SLEEVE)
+                                .color(Color.BLUE)
+                                .degree(Degree.NORMAL)
+                                .clothImage(ClothImage.builder()
+                                        .imgUrl("/upload/clothes/image1")
+                                        .build())
+                                .build())
+                        .build(),
+                ClothResponseDto.builder()
+                        .user(user)
+                        .cloth(Cloth.builder()
+                                .user(user)
+                                .largeCategory(LargeCategory.OUTER)
+                                .smallCategory(SmallCategory.BLOUSON)
+                                .color(Color.NAVY)
+                                .degree(Degree.NORMAL)
+                                .clothImage(ClothImage.builder()
+                                        .imgUrl("/upload/clothes/image2")
+                                        .build())
+                                .build())
+                        .build(),
+                ClothResponseDto.builder()
+                        .user(user)
+                        .cloth(Cloth.builder()
+                                .user(user)
+                                .largeCategory(LargeCategory.BOTTOM)
+                                .smallCategory(SmallCategory.COTTON_PANTS)
+                                .color(Color.BEIGE)
+                                .degree(Degree.NORMAL)
+                                .clothImage(ClothImage.builder()
+                                        .imgUrl("/upload/clothes/image3")
+                                        .build())
+                                .build())
+                        .build()
+        );
 
+        given(clothService.getAllClothes(userId)).willReturn(clothes);
+
+        // when
+        // then
+        mockMvc.perform(get("/moipzy/clothes/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].userId").value(userId))
+                .andExpect(jsonPath("$[1].userId").value(userId))
+                .andExpect(jsonPath("$[2].userId").value(userId))
+                .andExpect(jsonPath("$[0].largeCategory").value("TOP"))
+                .andExpect(jsonPath("$[1].largeCategory").value("OUTER"))
+                .andExpect(jsonPath("$[2].largeCategory").value("BOTTOM"));
+
+        verify(clothService, times(1)).getAllClothes(userId);
     }
 
     @Test
     void updateCloth() throws Exception {
+        // given
+        int clothId = 1;
+        ClothUpdateRequestDto clothUpdateRequestDto = ClothUpdateRequestDto.builder()
+                .largeCategory(LargeCategory.OUTER)
+                .smallCategory(SmallCategory.DENIM_JACKET)
+                .color(Color.CHARCOAL)
+                .degree(Degree.NORMAL)
+                .build();
+
+        given(clothService.updateCloth(eq(clothId), any(ClothUpdateRequestDto.class))).willReturn(clothId);
+
+        // when
+        // then
+        mockMvc.perform(patch("/moipzy/clothes/{clothId}", clothId)
+                .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(clothUpdateRequestDto).getBytes()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("옷 수정 완료. Id : " + clothId));
+
+        verify(clothService, times(1)).updateCloth(eq(clothId), any(ClothUpdateRequestDto.class));
 
     }
 
     @Test
     void deleteCloth() throws Exception {
+        // given
+        int clothId = 1;
 
+        given(clothService.deleteCloth(clothId)).willReturn(clothId);
+
+        // when
+        // then
+        mockMvc.perform(delete("/moipzy/clothes/{clothId}", clothId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("옷 삭제 완료. Id : " + clothId));
+
+        verify(clothService, times(1)).deleteCloth(clothId);
     }
 }
