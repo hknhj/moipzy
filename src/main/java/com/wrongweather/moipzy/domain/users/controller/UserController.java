@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +40,7 @@ public class UserController {
 
     // 일반 로그인 진행
     @PostMapping("/login")
-    public String login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
+    public ResponseEntity<?> login(@RequestBody UserLoginRequestDto userLoginRequestDto) {
         List<String> accessTokenAndName = userService.login(userLoginRequestDto);
 
         String token = accessTokenAndName.get(0);
@@ -46,7 +48,9 @@ public class UserController {
         String username = accessTokenAndName.get(1);
         String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8);
 
-        return "redirect:/loginmypage?token=" + token + "&username=" + encodedUsername;  // 토큰을 쿼리 파라미터로 전달하여 리디렉션
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .body(encodedUsername);
     }
 
     // 구글 로그인으로 리디렉션 되도록 만드는 컨트롤러
