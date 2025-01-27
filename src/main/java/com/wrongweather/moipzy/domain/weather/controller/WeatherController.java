@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class WeatherController {
@@ -14,8 +16,8 @@ public class WeatherController {
     private final WeatherService weatherService;
 
     @GetMapping("/weather")
-    public void getWeather() {
-        weatherService.getWeather();
+    public List<Integer> getWeather() {
+        return weatherService.getWeather();
     }
 }
 

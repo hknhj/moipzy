@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class WeatherService {
     //tomorrowMinTemp
     //tomorrowMaxTemp
     //redis에 저장
-    public void getWeather() {
+    public List<Integer> getWeather() {
         log.info("Initializing daily weather information at server startup...");
         String requestURL = "https://api.openweathermap.org/data/2.5/forecast" +
                 "?lat=37" +
@@ -69,8 +70,12 @@ public class WeatherService {
             vop.set("tomorrowMinTemp", tempList.get(2).toString());
             vop.set("tomorrowMaxTemp", tempList.get(3).toString());
 
-        }catch (Exception e){
+            return tempList;
+
+        } catch (Exception e){
             e.printStackTrace();
+
+            return Collections.emptyList();
         }
     }
 
